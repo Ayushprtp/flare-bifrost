@@ -1,6 +1,6 @@
-# Bifrost TypeScript Integration Tests
+# Flare TypeScript Integration Tests
 
-TypeScript/JavaScript integration test suite for testing AI providers through Bifrost proxy. This test suite uses Vitest and provides comprehensive coverage across multiple AI SDKs.
+TypeScript/JavaScript integration test suite for testing AI providers through Flare proxy. This test suite uses Vitest and provides comprehensive coverage across multiple AI SDKs.
 
 ## Quick Start
 
@@ -23,11 +23,11 @@ npm test -- -t "Simple Chat"       # By pattern
 
 ## Architecture Overview
 
-The TypeScript integration tests use the same centralized configuration as the Python tests, routing all AI requests through Bifrost:
+The TypeScript integration tests use the same centralized configuration as the Python tests, routing all AI requests through Flare:
 
 ```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Test Client   │───▶│  Bifrost Gateway │───▶│  AI Provider    │
+│   Test Client   │───▶│  Flare Gateway │───▶│  AI Provider    │
 │  (TypeScript)   │    │  localhost:8080  │    │  (OpenAI, etc.) │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
@@ -185,7 +185,7 @@ make test-integrations-ts VERBOSE=1
 
 ## Cross-Provider Testing
 
-The OpenAI test file supports cross-provider testing through Bifrost's model name routing. By formatting the model name as `provider/model`, Bifrost routes the request to the appropriate provider:
+The OpenAI test file supports cross-provider testing through Flare's model name routing. By formatting the model name as `provider/model`, Flare routes the request to the appropriate provider:
 
 ```typescript
 import { formatProviderModel } from '../src/utils'
@@ -210,7 +210,7 @@ const bedrockResponse = await client.chat.completions.create({
 })
 ```
 
-This allows testing any provider using the OpenAI SDK format while Bifrost handles the routing based on the model name prefix.
+This allows testing any provider using the OpenAI SDK format while Flare handles the routing based on the model name prefix.
 
 ## Writing New Tests
 
@@ -288,7 +288,7 @@ describe('Cross-Provider Tests', () => {
 ```text
 Error: connect ECONNREFUSED 127.0.0.1:8080
 ```
-Solution: Ensure Bifrost is running on the expected port.
+Solution: Ensure Flare is running on the expected port.
 
 **2. API Key Not Set**
 ```text
@@ -300,7 +300,7 @@ Solution: Set the required environment variables.
 ```text
 Error: Timeout of 300000ms exceeded
 ```
-Solution: Check network connectivity and Bifrost logs.
+Solution: Check network connectivity and Flare logs.
 
 ### Debug Mode
 
@@ -308,7 +308,7 @@ Solution: Check network connectivity and Bifrost logs.
 # Run with debug output
 DEBUG=* npm test -- tests/test-openai.test.ts
 
-# Check Bifrost logs
+# Check Flare logs
 tail -f /tmp/bifrost-test.log
 ```
 

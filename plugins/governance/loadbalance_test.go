@@ -53,14 +53,14 @@ func loadBalance(t *testing.T, p *GovernancePlugin, ctx *schemas.BifrostContext,
 // the explicit prefix must win over VK load balancing even when multiple weighted
 // providers allow the model.
 func TestLoadBalanceProvider_ExplicitProviderPrefixSkipsLoadBalancing(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 		buildProviderConfig("anthropic", []string{"*"}),
 	})
 	p := newLoadBalanceTestPlugin(t, vk)
 
 	for range 20 {
-		ctx := presentCtx("sk-bf-lb")
+		ctx := presentCtx("sk-fx-lb")
 		got, err := loadBalance(t, p, ctx, "openai/gpt-4o")
 		require.NoError(t, err)
 		assert.Equal(t, "openai/gpt-4o", got)
@@ -70,11 +70,11 @@ func TestLoadBalanceProvider_ExplicitProviderPrefixSkipsLoadBalancing(t *testing
 // TestLoadBalanceProvider_UnprefixedModelLoadBalances verifies that a bare model
 // string still goes through VK load balancing and comes back provider-prefixed.
 func TestLoadBalanceProvider_UnprefixedModelLoadBalances(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 	})
 	p := newLoadBalanceTestPlugin(t, vk)
-	ctx := presentCtx("sk-bf-lb")
+	ctx := presentCtx("sk-fx-lb")
 
 	got, err := loadBalance(t, p, ctx, "gpt-4o")
 	require.NoError(t, err)
@@ -85,11 +85,11 @@ func TestLoadBalanceProvider_UnprefixedModelLoadBalances(t *testing.T) {
 // "/" prefix that is not a known provider (e.g. a HuggingFace-style namespace) is
 // kept as part of the model name and load balancing still applies.
 func TestLoadBalanceProvider_UnknownPrefixIsTreatedAsModelNamespace(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("groq", []string{"*"}),
 	})
 	p := newLoadBalanceTestPlugin(t, vk)
-	ctx := presentCtx("sk-bf-lb")
+	ctx := presentCtx("sk-fx-lb")
 
 	got, err := loadBalance(t, p, ctx, "meta-llama/llama-3.1-8b-instant")
 	require.NoError(t, err)
@@ -119,14 +119,14 @@ func newLoadBalanceTestPluginWithStore(t *testing.T, vk *configstoreTables.Table
 }
 
 func lbCtx() *schemas.BifrostContext {
-	ctx := presentCtx("sk-bf-lb")
+	ctx := presentCtx("sk-fx-lb")
 	return ctx
 }
 
 // A provider the request holds only through a composed permit is a candidate, and carries that
 // permit's weight: the whole point of composing permits onto a request rather than beside it.
 func TestLoadBalanceProvider_ComposedProviderParticipates(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", nil)
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", nil)
 	contributed := grant.NewPermit("other", "o1", "Pool", true, false, []schemas.ProviderPermit{{
 		Provider:      "groq",
 		AllowedModels: []string{"*"},
@@ -146,7 +146,7 @@ func TestLoadBalanceProvider_ComposedProviderParticipates(t *testing.T) {
 // Under intersect, a provider the composed permit does not permit is never a candidate, however
 // the key is configured.
 func TestLoadBalanceProvider_IntersectRemovedProviderIsNeverACandidate(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("groq", []string{"*"}),
 	})
 	narrow := permitWithProviders("other", "o1", "Narrow", "openai")
@@ -165,7 +165,7 @@ func TestLoadBalanceProvider_IntersectRemovedProviderIsNeverACandidate(t *testin
 func TestLoadBalanceProvider_UnweightedProviderIsNotSelected(t *testing.T) {
 	unweighted := buildProviderConfig("groq", []string{"*"})
 	unweighted.Weight = nil
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK",
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK",
 		[]configstoreTables.TableVirtualKeyProviderConfig{unweighted})
 	p := newLoadBalanceTestPlugin(t, vk)
 
@@ -181,7 +181,7 @@ func TestLoadBalanceProvider_DuplicateProviderConfigsBothCount(t *testing.T) {
 	first.Weight = schemas.Ptr(1.0)
 	second := buildProviderConfig("groq", []string{"*"})
 	second.Weight = schemas.Ptr(1.0)
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK",
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK",
 		[]configstoreTables.TableVirtualKeyProviderConfig{first, second})
 
 	access := grant.NewAccess([]schemas.Permit{vkPermit(vk, nil)}, nil, "", nil)
@@ -191,7 +191,7 @@ func TestLoadBalanceProvider_DuplicateProviderConfigsBothCount(t *testing.T) {
 // The allowlist is published from the request's access, and a request with no key publishes
 // nothing at all: an empty list would mean no provider is permitted and fail-close the request.
 func TestPublishRoutingAllowlist(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("groq", []string{"llama-3.1-8b-instant"}),
 		buildProviderConfig("openai", []string{"gpt-4o"}),
 	})
@@ -251,7 +251,7 @@ func TestPublishRoutingAllowlist(t *testing.T) {
 // presents no key but is granted weighted providers is balanced across them, the same
 // candidates, weights and fallbacks a key would have produced.
 func TestLoadBalanceProvider_GrantsHeldWithoutAKeyAreBalanced(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", nil)
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", nil)
 	held := grant.NewPermit("other", "o1", "Holder", true, false, []schemas.ProviderPermit{{
 		Provider:      "groq",
 		AllowedModels: []string{"*"},
@@ -277,7 +277,7 @@ func TestLoadBalanceProvider_GrantsHeldWithoutAKeyAreBalanced(t *testing.T) {
 // And a request carrying nothing is left exactly as it arrived, which is what every pure
 // key-based deployment sees for its key-less traffic.
 func TestLoadBalanceProvider_NoGrantsLeavesTheRequestAlone(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 	})
 	p := newLoadBalanceTestPlugin(t, vk)
@@ -328,7 +328,7 @@ func (s *excludingStore) CheckProviderCandidateExclusion(_ *schemas.BifrostConte
 // reach and what pays for it are separate questions, and only the second one is the store's, so a
 // deployment can fund candidates from limits this algorithm never hears about.
 func TestLoadBalanceProvider_StoreDecidesWhichCandidatesCanBeFunded(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-lb", "LB VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 		buildProviderConfig("anthropic", []string{"*"}),
 	})

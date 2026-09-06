@@ -1,14 +1,14 @@
 # Async Webhooks Receiver
 
-A minimal, dependency-free Go receiver for Bifrost async inference webhooks. Its
+A minimal, dependency-free Go receiver for Flare async inference webhooks. Its
 only job is to demonstrate the one thing every receiver must get right:
 **verifying the signature before trusting a delivery.**
 
-When an async inference job reaches a terminal state, Bifrost POSTs a signed
+When an async inference job reaches a terminal state, Flare POSTs a signed
 event to every subscribed endpoint. The signature proves the request came from
-your Bifrost instance and that the body was not altered in transit.
+your Flare instance and that the body was not altered in transit.
 
-## What Bifrost sends
+## What Flare sends
 
 Each delivery is a `POST` with a JSON body and three signing headers:
 
@@ -38,7 +38,7 @@ The body looks like:
 Events are `async_job.completed` and `async_job.failed`. The `data` fields
 beyond `job_id` and `status` are best-effort:
 
-- `result_url` — GET this (through Bifrost, with your auth) to fetch the full
+- `result_url` — GET this (through Flare, with your auth) to fetch the full
   result. Valid until `result_expires_at`.
 - `response` — the full response, inlined **only** if the endpoint opted in and
   it fits the size limit.
@@ -70,7 +70,7 @@ are ~40 lines of standard library.
 
 ## Requiring custom headers
 
-Bifrost endpoints can be configured to send custom headers with every delivery
+Flare endpoints can be configured to send custom headers with every delivery
 (for example an `Authorization` value). The signature alone already proves
 authenticity, but checking such headers is cheap defense-in-depth: it rejects
 unwanted traffic before any crypto runs.
@@ -94,10 +94,10 @@ WEBHOOK_SECRET=whsec_your_secret_here go run .
 ```
 
 The receiver listens on `:8080` (override with `ADDR`) and accepts deliveries at
-`POST /webhook`. Point a Bifrost webhook endpoint at `http://<host>:8080/webhook`
+`POST /webhook`. Point a Flare webhook endpoint at `http://<host>:8080/webhook`
 and complete a job to see verified deliveries logged.
 
-> Plain `http://` endpoints are only accepted by Bifrost when the endpoint has
+> Plain `http://` endpoints are only accepted by Flare when the endpoint has
 > `allow_private_network` set. Use `https://` in production.
 
 ## Test
@@ -107,5 +107,5 @@ go test ./...
 ```
 
 The tests pin the canonical Standard Webhooks reference vector — the same one
-Bifrost's own signer pins — so a passing run proves this receiver verifies
-byte-for-byte what Bifrost signs.
+Flare's own signer pins — so a passing run proves this receiver verifies
+byte-for-byte what Flare signs.

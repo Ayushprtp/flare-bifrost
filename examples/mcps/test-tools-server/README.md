@@ -25,4 +25,4 @@ node dist/index.js
 
 ## Integration Testing
 
-This server is designed to be used with Bifrost's MCP integration tests via STDIO transport.
+This server is designed to be used with Flare's MCP integration tests via STDIO transport.

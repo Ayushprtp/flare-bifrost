@@ -17,9 +17,9 @@ make build
 The build produces `build/virtual-key-from-config.so`.
 
 This example is part of the repository's `go.work`, so local builds use the same
-Go version, Bifrost core source, and shared dependency graph as `bifrost-http`.
+Go version, Flare core source, and shared dependency graph as `bifrost-http`.
 When building it from a separate repository, pin `github.com/maximhq/bifrost/core`
-and the Go toolchain to the exact versions used by the target Bifrost binary.
+and the Go toolchain to the exact versions used by the target Flare binary.
 
 ## Configure
 

@@ -18,17 +18,17 @@ func TestRecordingInstallsAGrantWhenTheContextCarriesNone(t *testing.T) {
 	ctx := schemas.NewBifrostContext(context.Background(), schemas.NoDeadline)
 	require.Nil(t, ctx.Grant())
 
-	RecordCredential(ctx, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"))
+	RecordCredential(ctx, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"))
 	require.NotNil(t, ctx.Grant(), "recording on a bare context installs its grant")
 	installed := ctx.Grant()
-	assert.Equal(t, "sk-bf-1", installed.Identity().Credential().Value)
+	assert.Equal(t, "sk-fx-1", installed.Identity().Credential().Value)
 
 	RecordUser(ctx, &schemas.UserRef{ID: "u1"})
 	assert.Same(t, installed, ctx.Grant(), "and keeps using it")
 	assert.Equal(t, "u1", ctx.Grant().Identity().User().ID)
 
 	// A nil context has nothing to record on, and must not panic.
-	RecordCredential(nil, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"))
+	RecordCredential(nil, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"))
 	RecordUser(nil, &schemas.UserRef{ID: "u1"})
 }
 
@@ -42,8 +42,8 @@ func TestCredentialFromContext(t *testing.T) {
 		{name: "nothing presented", values: nil, want: schemas.Credential{}},
 		{
 			name:   "a virtual key in a header",
-			values: map[any]any{schemas.BifrostContextKeyVirtualKey: "sk-bf-1"},
-			want:   grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"),
+			values: map[any]any{schemas.BifrostContextKeyVirtualKey: "sk-fx-1"},
+			want:   grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"),
 		},
 		{
 			name:   "what the middleware recorded",
@@ -53,10 +53,10 @@ func TestCredentialFromContext(t *testing.T) {
 		{
 			name: "a virtual key goes first",
 			values: map[any]any{
-				schemas.BifrostContextKeyVirtualKey:     "sk-bf-1",
+				schemas.BifrostContextKeyVirtualKey:     "sk-fx-1",
 				schemas.BifrostContextKeyAuthCredential: stamped,
 			},
-			want: grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"),
+			want: grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"),
 		},
 		{
 			name:   "a user with nothing recorded is a user, not a credential",
@@ -107,8 +107,8 @@ func TestRecordCredentialAndUserKeepEachOther(t *testing.T) {
 	assert.Equal(t, &schemas.UserRef{ID: "u1", Name: "Ada"}, g.Identity().User(), "the user is kept")
 
 	// The last layer to authenticate is the one the request goes by.
-	RecordCredential(ctx, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"))
-	assert.Equal(t, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"), g.Identity().Credential())
+	RecordCredential(ctx, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"))
+	assert.Equal(t, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"), g.Identity().Credential())
 	assert.Equal(t, "u1", g.Identity().User().ID)
 }
 
@@ -117,7 +117,7 @@ func TestRecordingKeepsWhatResolutionSettled(t *testing.T) {
 	g := grant.New()
 	ctx.SetGrant(g)
 	g.SetIdentity(grant.NewIdentity(
-		grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-1"),
+		grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-1"),
 		nil,
 		&schemas.EntityRef{ID: "vk1", Name: "Key"},
 		[]schemas.EntityRef{{ID: "t1"}},
@@ -128,7 +128,7 @@ func TestRecordingKeepsWhatResolutionSettled(t *testing.T) {
 
 	RecordUser(ctx, &schemas.UserRef{ID: "u1"})
 	identity := g.Identity()
-	assert.Equal(t, "sk-bf-1", identity.Credential().Value)
+	assert.Equal(t, "sk-fx-1", identity.Credential().Value)
 	assert.Equal(t, "vk1", identity.VirtualKey().ID)
 	assert.Equal(t, []schemas.EntityRef{{ID: "t1"}}, identity.Teams())
 	assert.Equal(t, []schemas.EntityRef{{ID: "c1"}}, identity.Customers())
@@ -140,14 +140,14 @@ func TestRecordingKeepsWhatResolutionSettled(t *testing.T) {
 func TestConvertToBifrostContextSettlesTheIdentity(t *testing.T) {
 	t.Run("a virtual key header", func(t *testing.T) {
 		ctx := &fasthttp.RequestCtx{}
-		ctx.Request.Header.Set("x-bf-vk", "sk-bf-abc")
+		ctx.Request.Header.Set("x-bf-vk", "sk-fx-abc")
 		converted, cancel := ConvertToBifrostContext(ctx, testHandlerStore{})
 		defer cancel()
 
 		require.NotNil(t, converted.Grant())
 		identity := converted.Grant().Identity()
 		require.NotNil(t, identity)
-		assert.Equal(t, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-abc"), identity.Credential())
+		assert.Equal(t, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-abc"), identity.Credential())
 		assert.Nil(t, identity.User())
 	})
 
@@ -167,7 +167,7 @@ func TestConvertToBifrostContextSettlesTheIdentity(t *testing.T) {
 
 	t.Run("a virtual key header goes first, the session's user is kept", func(t *testing.T) {
 		ctx := &fasthttp.RequestCtx{}
-		ctx.Request.Header.Set("x-bf-vk", "sk-bf-abc")
+		ctx.Request.Header.Set("x-bf-vk", "sk-fx-abc")
 		ctx.SetUserValue(schemas.BifrostContextKeyAuthCredential, grant.NewCredential(grant.CredentialSessionToken, "u1"))
 		ctx.SetUserValue(schemas.BifrostContextKeyUserID, "u1")
 		converted, cancel := ConvertToBifrostContext(ctx, testHandlerStore{})
@@ -175,7 +175,7 @@ func TestConvertToBifrostContextSettlesTheIdentity(t *testing.T) {
 
 		identity := converted.Grant().Identity()
 		require.NotNil(t, identity)
-		assert.Equal(t, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-abc"), identity.Credential())
+		assert.Equal(t, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-abc"), identity.Credential())
 		assert.Equal(t, "u1", identity.User().ID)
 	})
 

@@ -46,7 +46,7 @@ type jwtMCPClaims struct {
 
 // extractBearerJWT returns the raw JWT string from an Authorization: Bearer
 // header when the token looks like a JWT (starts with "eyJ"). Returns empty
-// string when the header is absent or the token is a VK (starts with "sk-bf-").
+// string when the header is absent or the token is a VK (starts with "sk-fx-").
 func extractBearerJWT(ctx *fasthttp.RequestCtx) string {
 	auth := strings.TrimSpace(string(ctx.Request.Header.Peek("Authorization")))
 	if auth == "" {
@@ -57,7 +57,7 @@ func extractBearerJWT(ctx *fasthttp.RequestCtx) string {
 	}
 	token := strings.TrimSpace(auth[7:])
 	// JWTs are base64url-encoded JSON starting with '{', which encodes to "eyJ".
-	// VKs start with the "sk-bf-" prefix. Anything not starting with "eyJ" is
+	// VKs start with the "sk-fx-" prefix. Anything not starting with "eyJ" is
 	// treated as a non-JWT credential and left to the VK path.
 	if !strings.HasPrefix(token, "eyJ") {
 		return ""

@@ -60,7 +60,7 @@ This creates `build/multi-interface.so`
 
 ## Configuration
 
-Add to your Bifrost config:
+Add to your Flare config:
 
 ```json
 {

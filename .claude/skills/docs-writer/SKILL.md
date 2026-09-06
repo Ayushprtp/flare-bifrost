@@ -1,12 +1,12 @@
 ---
 name: docs-writer
-description: Write, update, and review Mintlify MDX documentation for Bifrost features. Explores the full codebase (UI, Go backend, config schema), validates config.json examples, places screenshot placeholders, and presents outlines for approval before writing. Invoked with /docs-writer <feature-name>, /docs-writer update <doc-path>, or /docs-writer review <doc-path>.
+description: Write, update, and review Mintlify MDX documentation for Flare features. Explores the full codebase (UI, Go backend, config schema), validates config.json examples, places screenshot placeholders, and presents outlines for approval before writing. Invoked with /docs-writer <feature-name>, /docs-writer update <doc-path>, or /docs-writer review <doc-path>.
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, WebSearch, WebFetch, mcp__context7__resolve-library-id, mcp__context7__query-docs, Task, AskUserQuestion, TodoWrite
 ---
 
-# Bifrost Documentation Writer
+# Flare Documentation Writer
 
-Write, update, and review Mintlify MDX documentation for Bifrost features. Performs thorough codebase research across both the React UI and Go backend, validates config.json examples against the schema, and follows established documentation conventions.
+Write, update, and review Mintlify MDX documentation for Flare features. Performs thorough codebase research across both the React UI and Go backend, validates config.json examples against the schema, and follows established documentation conventions.
 
 ## Usage
 
@@ -633,7 +633,7 @@ Use relative links for internal cross-references:
 [Link Text](./page#section-anchor)
 ```
 
-Common cross-reference patterns in Bifrost docs:
+Common cross-reference patterns in Flare docs:
 - Governance docs link to each other (virtual-keys, routing, budget-and-limits, mcp-tools)
 - Feature docs link to the quickstart guides
 - Enterprise docs link to the OSS equivalents

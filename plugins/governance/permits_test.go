@@ -85,7 +85,7 @@ func TestPermitForVirtualKey_OrganizationLimits(t *testing.T) {
 	}
 
 	t.Run("a customer reached through the key's team", func(t *testing.T) {
-		vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+		vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 		vk.Budgets = []configstoreTables.TableBudget{{ID: "budget-key"}}
 		vk.TeamID = &team.ID
 		vk.Team = &configstoreTables.TableTeam{ID: team.ID, Name: team.Name, CustomerID: &customer.ID}
@@ -107,7 +107,7 @@ func TestPermitForVirtualKey_OrganizationLimits(t *testing.T) {
 	})
 
 	t.Run("a key attached straight to a customer", func(t *testing.T) {
-		vk := buildVirtualKey("vk-2", "sk-bf-direct", "Direct Key", true)
+		vk := buildVirtualKey("vk-2", "sk-fx-direct", "Direct Key", true)
 		vk.CustomerID = &customer.ID
 
 		budgets, rateLimits := storeWith(vk)
@@ -118,7 +118,7 @@ func TestPermitForVirtualKey_OrganizationLimits(t *testing.T) {
 
 	t.Run("a key's own customer wins over its team's", func(t *testing.T) {
 		other := &configstoreTables.TableCustomer{ID: "cust-2", Name: "Other", Budgets: []configstoreTables.TableBudget{{ID: "budget-other"}}}
-		vk := buildVirtualKey("vk-3", "sk-bf-both", "Both Key", true)
+		vk := buildVirtualKey("vk-3", "sk-fx-both", "Both Key", true)
 		vk.CustomerID = &other.ID
 		vk.TeamID = &team.ID
 		vk.Team = &configstoreTables.TableTeam{ID: team.ID, Name: team.Name, CustomerID: &customer.ID}
@@ -137,7 +137,7 @@ func TestPermitForVirtualKey_OrganizationLimits(t *testing.T) {
 	})
 
 	t.Run("no organization above the key", func(t *testing.T) {
-		vk := buildVirtualKey("vk-4", "sk-bf-lonely", "Lonely Key", true)
+		vk := buildVirtualKey("vk-4", "sk-fx-lonely", "Lonely Key", true)
 		vk.Budgets = []configstoreTables.TableBudget{{ID: "budget-key"}}
 
 		budgets, _ := storeWith(vk)
@@ -147,7 +147,7 @@ func TestPermitForVirtualKey_OrganizationLimits(t *testing.T) {
 
 	t.Run("a team the store has never heard of contributes nothing", func(t *testing.T) {
 		missing := "team-gone"
-		vk := buildVirtualKey("vk-5", "sk-bf-stale", "Stale Key", true)
+		vk := buildVirtualKey("vk-5", "sk-fx-stale", "Stale Key", true)
 		vk.TeamID = &missing
 
 		budgets, rateLimits := storeWith(vk)
@@ -173,7 +173,7 @@ func holderKindsOf(limits []schemas.Limit) []string {
 }
 
 func TestPermitForVirtualKey_Identity(t *testing.T) {
-	vk := buildVirtualKey("vk-1", "sk-bf-test", "Data Team Key", true)
+	vk := buildVirtualKey("vk-1", "sk-fx-test", "Data Team Key", true)
 
 	permit := vkPermit(vk, nil)
 
@@ -188,7 +188,7 @@ func TestPermitForVirtualKey_Identity(t *testing.T) {
 }
 
 func TestPermitForVirtualKey_ProviderPermits(t *testing.T) {
-	vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+	vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		{
 			Provider:          "openai",
@@ -238,7 +238,7 @@ func TestPermitForVirtualKey_ProviderPermits(t *testing.T) {
 func TestPermitForVirtualKey_Limits(t *testing.T) {
 	keyRateLimitID := "rl-key"
 	openaiRateLimitID := "rl-openai"
-	vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+	vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 	vk.RateLimitID = &keyRateLimitID
 	vk.Budgets = []configstoreTables.TableBudget{{ID: "budget-key-daily"}, {ID: "budget-key-monthly"}}
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
@@ -298,7 +298,7 @@ func TestPermitForVirtualKey_Limits(t *testing.T) {
 // is the holder each names.
 func TestPermitForVirtualKey_LimitsOfTwoConfigsForOneProvider(t *testing.T) {
 	firstRateLimit, secondRateLimit := "rl-first", "rl-second"
-	vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+	vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		{
 			ID: 1, Provider: "openai", AllowedModels: schemas.WhiteList{"gpt-4o"},
@@ -329,7 +329,7 @@ func TestPermitForVirtualKey_LimitsOfTwoConfigsForOneProvider(t *testing.T) {
 
 func TestPermitForVirtualKey_MCPPermits(t *testing.T) {
 	t.Run("the key's own configs are carried through", func(t *testing.T) {
-		vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+		vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 		vk.MCPConfigs = []configstoreTables.TableVirtualKeyMCPConfig{
 			vkMCPConfig("github-id", "github", "read_file"),
 			vkMCPConfig("slack-id", "slack", "*"),
@@ -343,7 +343,7 @@ func TestPermitForVirtualKey_MCPPermits(t *testing.T) {
 	})
 
 	t.Run("clients open to every key grant all their tools", func(t *testing.T) {
-		vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+		vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 		open := map[string]string{"jira-id": "jira"}
 
 		permit := vkPermit(vk, open)
@@ -353,7 +353,7 @@ func TestPermitForVirtualKey_MCPPermits(t *testing.T) {
 	})
 
 	t.Run("a config with no tools owns its client: dropped, and not reopened by the default", func(t *testing.T) {
-		vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+		vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 		vk.MCPConfigs = []configstoreTables.TableVirtualKeyMCPConfig{
 			vkMCPConfig("github-id", "github", "read_file"),
 			// Configured with no tool: no permit, but still the key's to decide, so the default must not reopen it.
@@ -372,7 +372,7 @@ func TestPermitForVirtualKey_MCPPermits(t *testing.T) {
 	})
 
 	t.Run("open clients are ordered, so the permit is stable", func(t *testing.T) {
-		vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+		vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 		open := map[string]string{"c-id": "c", "a-id": "a", "b-id": "b"}
 
 		for range 8 {
@@ -402,7 +402,7 @@ func mcpScenarios() []struct {
 	wantTool        map[string]bool
 } {
 	withConfigs := func(configs ...configstoreTables.TableVirtualKeyMCPConfig) *configstoreTables.TableVirtualKey {
-		vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+		vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 		vk.MCPConfigs = configs
 		return vk
 	}
@@ -508,7 +508,7 @@ func TestPermitForVirtualKey_ProviderAndModelRules(t *testing.T) {
 	// The rules the key's own permit must keep: a provider with no config is not permitted, a
 	// configured provider is, a model must be in the allowlist, and a blacklisted model is refused
 	// however permissive the allowlist.
-	vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+	vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		{Provider: "openai", AllowedModels: schemas.WhiteList{"gpt-4o", "o3"}, BlacklistedModels: schemas.BlackList{"o3"}},
 		{Provider: "anthropic", AllowedModels: schemas.WhiteList{"*"}},
@@ -529,7 +529,7 @@ func TestPermitForVirtualKey_ProviderAndModelRules(t *testing.T) {
 	assert.False(t, access.IsModelAllowed("cohere", "command-r"))
 
 	// A key with no provider config at all permits nothing: deny by default.
-	bare := buildVirtualKey("vk-2", "sk-bf-bare", "Bare Key", true)
+	bare := buildVirtualKey("vk-2", "sk-fx-bare", "Bare Key", true)
 	bareAccess := vkAccess(bare, nil)
 	assert.False(t, bareAccess.IsProviderAllowed("openai"))
 	assert.False(t, bareAccess.IsModelAllowed("openai", "gpt-4o"))
@@ -538,7 +538,7 @@ func TestPermitForVirtualKey_ProviderAndModelRules(t *testing.T) {
 func TestPermitForVirtualKey_KeysForModel(t *testing.T) {
 	// Two configs for one provider are read as one: a request served by that provider may use any
 	// key either config allows.
-	vk := buildVirtualKey("vk-1", "sk-bf-test", "Key", true)
+	vk := buildVirtualKey("vk-1", "sk-fx-test", "Key", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		{Provider: "openai", AllowedModels: schemas.WhiteList{"*"}, Keys: []configstoreTables.TableKey{{KeyID: "key-us-1"}}},
 		{Provider: "openai", AllowedModels: schemas.WhiteList{"*"}, Keys: []configstoreTables.TableKey{{KeyID: "key-us-2"}}},
@@ -751,7 +751,7 @@ func TestResolveAccessRecordsNothingForAnUnresolvableCredential(t *testing.T) {
 	vk := buildVKForMCPStamping([]string{"read_file"})
 	store := &permitStore{}
 	plugin := newAccessTestPlugin(t, vk, store)
-	ctx := presentCtx("sk-bf-unknown")
+	ctx := presentCtx("sk-fx-unknown")
 
 	access, err := plugin.ResolveAccess(ctx)
 	require.NoError(t, err)
@@ -815,20 +815,20 @@ func TestPresentedVirtualKey(t *testing.T) {
 		// Whatever the context carries under the key's own name, the transport settled that nothing
 		// was presented, and that is what the request goes by.
 		ctx := emptyCtx()
-		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-stamped")
+		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-stamped")
 		assert.Equal(t, "", PresentedVirtualKey(ctx))
 	})
 
 	t.Run("an identity that presented a key answers with it", func(t *testing.T) {
 		ctx := emptyCtx()
-		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-stale")
-		ctx.Grant().SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-settled"), nil, nil, nil, nil, nil, nil))
-		assert.Equal(t, "sk-bf-settled", PresentedVirtualKey(ctx), "what the transport settled, not what else the context carries")
+		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-stale")
+		ctx.Grant().SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-settled"), nil, nil, nil, nil, nil, nil))
+		assert.Equal(t, "sk-fx-settled", PresentedVirtualKey(ctx), "what the transport settled, not what else the context carries")
 	})
 
 	t.Run("an identity that presented something else presented no key", func(t *testing.T) {
 		ctx := emptyCtx()
-		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-stale")
+		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-stale")
 		ctx.Grant().SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialSessionToken, "u1"), &schemas.UserRef{ID: "u1"}, nil, nil, nil, nil, nil))
 		assert.Equal(t, "", PresentedVirtualKey(ctx))
 	})
@@ -884,7 +884,7 @@ func TestPreRequestHookWithoutAGrantReportsTheFault(t *testing.T) {
 
 // benchVK is a key of a realistic size: several providers, several MCP clients.
 func benchVK() *configstoreTables.TableVirtualKey {
-	vk := buildVirtualKey("vk-bench", "sk-bf-bench", "bench-key", true)
+	vk := buildVirtualKey("vk-bench", "sk-fx-bench", "bench-key", true)
 	for _, provider := range []string{"openai", "anthropic", "bedrock", "vertex", "groq"} {
 		vk.ProviderConfigs = append(vk.ProviderConfigs, configstoreTables.TableVirtualKeyProviderConfig{
 			Provider:      provider,
@@ -928,7 +928,7 @@ func benchPlugin(b *testing.B, store *LocalGovernanceStore) *GovernancePlugin {
 // benchCtx carries only the key on a grant nothing has resolved into: what resolution costs is
 // exactly what these benchmarks measure, so the access must not already be on the context.
 func benchCtx(_ *configstoreTables.TableVirtualKey) *schemas.BifrostContext {
-	ctx := presentCtx("sk-bf-bench")
+	ctx := presentCtx("sk-fx-bench")
 	return ctx
 }
 
@@ -968,7 +968,7 @@ func BenchmarkAccessChecks(b *testing.B) {
 // the same access the request path enforces, so the listing cannot advertise a model the very
 // next request would refuse.
 func TestFilterModelsForAccess(t *testing.T) {
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-test", "Test VK", []configstoreTables.TableVirtualKeyProviderConfig{
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-test", "Test VK", []configstoreTables.TableVirtualKeyProviderConfig{
 		{Provider: "openai", AllowedModels: schemas.WhiteList{"gpt-4o"}},
 		{Provider: "anthropic", AllowedModels: schemas.WhiteList{"*"}, BlacklistedModels: schemas.BlackList{"claude-3-haiku"}},
 	})
@@ -983,7 +983,7 @@ func TestFilterModelsForAccess(t *testing.T) {
 	}
 
 	t.Run("keeps only what the request may use", func(t *testing.T) {
-		ctx := presentCtx("sk-bf-test")
+		ctx := presentCtx("sk-fx-test")
 
 		access, err := plugin.ResolveAccess(ctx)
 		require.NoError(t, err)
@@ -1001,7 +1001,7 @@ func TestFilterModelsForAccess(t *testing.T) {
 	t.Run("a credential that resolves to nothing lists nothing", func(t *testing.T) {
 		// Presenting a key that grants nothing is not the same as presenting none: the key was the
 		// authority for the listing and it turned out to grant nothing, so nothing is listed.
-		ctx := presentCtx("sk-bf-unknown")
+		ctx := presentCtx("sk-fx-unknown")
 
 		access, err := plugin.ResolveAccess(ctx)
 		require.NoError(t, err)
@@ -1099,7 +1099,7 @@ func TestEvaluateRefusesAPresentedCredentialThatGrantsNothing(t *testing.T) {
 	plugin := newAccessTestPlugin(t, vk, nil)
 
 	t.Run("a credential that resolves to nothing is refused", func(t *testing.T) {
-		ctx := presentCtx("sk-bf-revoked")
+		ctx := presentCtx("sk-fx-revoked")
 
 		result, bifrostErr := plugin.Evaluate(ctx, &EvaluationRequest{
 			RequestType: schemas.ChatCompletionRequest,
@@ -1116,7 +1116,7 @@ func TestEvaluateRefusesAPresentedCredentialThatGrantsNothing(t *testing.T) {
 	t.Run("a credential the transport settled is read the same way", func(t *testing.T) {
 		// What was presented is the identity's to say once the transport has settled one.
 		ctx := emptyCtx()
-		ctx.Grant().SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-revoked"), nil, nil, nil, nil, nil, nil))
+		ctx.Grant().SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-revoked"), nil, nil, nil, nil, nil, nil))
 
 		result, bifrostErr := plugin.Evaluate(ctx, &EvaluationRequest{
 			RequestType: schemas.ChatCompletionRequest,
@@ -1308,7 +1308,7 @@ func TestEvaluateRefusesAPermitThatMayNotBeUsed(t *testing.T) {
 // scope-shaped type of its own would agree with a broken lookup.
 func TestPermitFindsItsOwnScopedModelConfigs(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-scoped", "Scoped VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-scoped", "Scoped VK", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 	}
@@ -1322,7 +1322,7 @@ func TestPermitFindsItsOwnScopedModelConfigs(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	ctx := resolverCtx(store, "sk-bf-scoped")
+	ctx := resolverCtx(store, "sk-fx-scoped")
 	bases, _, _ := store.ResolvePermits(ctx)
 	require.Len(t, bases, 1)
 	require.Equal(t, string(grant.PermitVirtualKey), bases[0].Type(), "the type production stamps, not a scope name")

@@ -1,6 +1,6 @@
 ---
 name: harness-test-writer
-description: Add regression test cases to the Bifrost provider harness (the Postman collection run via `make run-provider-harness-test`) based on a merged PR or a GitHub issue. Fetches the PR/issue, traces the affected wire path in the codebase, checks existing harness coverage, designs cases following harness conventions, inserts them into tests/e2e/api/collections/provider-harness.json without reformatting the file, and validates via the augment and filter scripts. Invoked with /harness-test-writer <PR# | issue# | URL> or /harness-test-writer (prompts for a reference).
+description: Add regression test cases to the Flare provider harness (the Postman collection run via `make run-provider-harness-test`) based on a merged PR or a GitHub issue. Fetches the PR/issue, traces the affected wire path in the codebase, checks existing harness coverage, designs cases following harness conventions, inserts them into tests/e2e/api/collections/provider-harness.json without reformatting the file, and validates via the augment and filter scripts. Invoked with /harness-test-writer <PR# | issue# | URL> or /harness-test-writer (prompts for a reference).
 allowed-tools: Read, Grep, Glob, Bash, WebFetch, Task, AskUserQuestion, TodoWrite, Edit, Write
 ---
 
@@ -39,7 +39,7 @@ codes) that the harness case must mirror.
 
 ## Step 2 - Understand the wire-level behavior to pin
 
-The harness tests Bifrost from the outside: HTTP requests against gateway routes, with
+The harness tests Flare from the outside: HTTP requests against gateway routes, with
 assertions on status codes and response/SSE bodies. Translate the PR/issue into that
 frame:
 

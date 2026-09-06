@@ -32,7 +32,7 @@ func TestCollectHierarchy_ScopedCustomerSkipsScalarTeamCustomer(t *testing.T) {
 	team.CustomerID = &customer.ID
 	team.Customer = customer
 
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", vkBudget)
 	vk.TeamID = &team.ID
 	vk.Team = team
 
@@ -45,7 +45,7 @@ func TestCollectHierarchy_ScopedCustomerSkipsScalarTeamCustomer(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 
 	// Which customer pays is decided when the holder's limits are resolved, so that is what this reads.
 	holds := func(limits []schemas.Limit, id string) bool {
@@ -108,7 +108,7 @@ func TestEvaluate_ScopedCustomerSkipsScalarTeamCustomerEnforcement(t *testing.T)
 	team.CustomerID = &customer.ID
 	team.Customer = customer
 
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", vkBudget)
 	vk.TeamID = &team.ID
 	vk.Team = team
 
@@ -129,7 +129,7 @@ func TestEvaluate_ScopedCustomerSkipsScalarTeamCustomerEnforcement(t *testing.T)
 	evaluate := func(scope string) *EvaluationResult {
 		// The key the request presented is what it is evaluated as, settled the way the transport
 		// settles it.
-		ctx := presentCtx("sk-bf-test")
+		ctx := presentCtx("sk-fx-test")
 		if scope != "" {
 			ctx.SetValue(schemas.BifrostContextKeyGovernanceScopedCustomerID, scope)
 		}

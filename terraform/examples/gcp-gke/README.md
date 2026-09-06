@@ -1,6 +1,6 @@
-# Bifrost on GCP GKE
+# Flare on GCP GKE
 
-Deploys Bifrost as a Kubernetes workload on Google Kubernetes Engine.
+Deploys Flare as a Kubernetes workload on Google Kubernetes Engine.
 
 ## Prerequisites
 

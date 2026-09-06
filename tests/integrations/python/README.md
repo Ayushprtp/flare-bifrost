@@ -1,6 +1,6 @@
-# Bifrost Integration Tests
+# Flare Integration Tests
 
-Production-ready end-to-end test suite for testing AI integrations through Bifrost proxy. This test suite provides uniform testing across multiple AI integrations with comprehensive coverage of chat, tool calling, image processing, embeddings, speech synthesis, and multimodal workflows.
+Production-ready end-to-end test suite for testing AI integrations through Flare proxy. This test suite provides uniform testing across multiple AI integrations with comprehensive coverage of chat, tool calling, image processing, embeddings, speech synthesis, and multimodal workflows.
 
 ## 🎯 Quick Start (TL;DR)
 
@@ -28,11 +28,11 @@ uv run pytest -n auto                  # Parallel execution
 
 ## 🌉 Architecture Overview
 
-The Bifrost integration tests use a centralized configuration system that routes all AI integration requests through Bifrost as a gateway/proxy:
+The Flare integration tests use a centralized configuration system that routes all AI integration requests through Flare as a gateway/proxy:
 
 ```text
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Test Client   │───▶│  Bifrost Gateway │───▶│  AI Integration    │
+│   Test Client   │───▶│  Flare Gateway │───▶│  AI Integration    │
 │                 │    │  localhost:8080  │    │  (OpenAI, etc.) │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
@@ -48,7 +48,7 @@ The Bifrost integration tests use a centralized configuration system that routes
 
 ## 🚀 Features
 
-- **🌉 Bifrost Gateway Integration**: All integrations route through Bifrost proxy
+- **🌉 Flare Gateway Integration**: All integrations route through Flare proxy
 - **🤖 Centralized Configuration**: YAML-based configuration with environment variable support
 - **🔧 Integration-Specific Clients**: Type-safe, integration-optimized implementations
 - **📋 Comprehensive Test Coverage**: 14 categories covering all major AI functionality
@@ -191,7 +191,7 @@ uv run pytest -k "tool_call" -v
 The system uses `config.yml` for centralized configuration. Set up your environment variables:
 
 ```bash
-# Required: Bifrost gateway
+# Required: Flare gateway
 export BIFROST_BASE_URL="http://localhost:8080"
 
 # Required: Integration API keys
@@ -219,7 +219,7 @@ uv run python tests/utils/config_loader.py
 
 This will display:
 
-- 🌉 Bifrost gateway URLs
+- 🌉 Flare gateway URLs
 - 🤖 Model configurations
 - ⚙️ API settings
 - ✅ Validation status
@@ -378,7 +378,7 @@ All existing pytest commands work the same way, just prefix them with `uv run`.
 
 Central configuration file containing:
 
-- Bifrost gateway settings and endpoints
+- Flare gateway settings and endpoints
 - Model configurations for all integrations
 - API settings (timeouts, retries)
 - Test parameters and limits
@@ -401,7 +401,7 @@ Maintains backward compatibility while delegating to the new config system.
 
 ### Key Configuration Sections
 
-#### Bifrost Gateway
+#### Flare Gateway
 
 ```yaml
 bifrost:
@@ -444,11 +444,11 @@ api:
 ```python
 from tests.utils.config_loader import get_integration_url
 
-# Get Bifrost URL for OpenAI
+# Get Flare URL for OpenAI
 openai_url = get_integration_url("openai")
 # Returns: http://localhost:8080/openai
 
-# Get integration URL through Bifrost
+# Get integration URL through Flare
 openai_url = get_integration_url("openai")
 # Returns: http://localhost:8080/openai
 ```
@@ -738,9 +738,9 @@ with pytest.raises(Exception):
    python test_audio.py --test test_14_speech_synthesis
    ```
 
-3. **Bifrost Configuration**
+3. **Flare Configuration**
    ```bash
-   # Ensure Bifrost is running and accessible
+   # Ensure Flare is running and accessible
    curl http://localhost:8080/openai/v1/audio/speech -I
    ```
 
@@ -758,8 +758,8 @@ with pytest.raises(Exception):
 # Test individual components
 uv run pytest tests/integrations/test_openai.py::TestOpenAIIntegration::test_14_speech_synthesis -v -s
 
-# Check Bifrost logs for audio endpoint requests
-# (Check your Bifrost instance logs)
+# Check Flare logs for audio endpoint requests
+# (Check your Flare instance logs)
 ```
 
 ## Getting Model Names
@@ -782,7 +782,7 @@ vision_model = get_model("anthropic", "vision")
 
 #### OpenAI
 
-- ✅ **Full Bifrost Integration**: Complete base URL support
+- ✅ **Full Flare Integration**: Complete base URL support
 - ✅ **Models**: gpt-3.5-turbo, gpt-4, gpt-4o, gpt-4o-mini, text-embedding-3-small, tts-1, whisper-1
 - ✅ **Features**: Chat, tools, vision, speech synthesis, transcription, embeddings
 - ✅ **Settings**: Organization/project IDs, timeouts, retries
@@ -790,7 +790,7 @@ vision_model = get_model("anthropic", "vision")
 
 #### Anthropic
 
-- ✅ **Full Bifrost Integration**: Complete base URL support
+- ✅ **Full Flare Integration**: Complete base URL support
 - ✅ **Models**: claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229, claude-3-5-sonnet-20241022
 - ✅ **Features**: Chat, tools, vision
 - ✅ **Settings**: API version headers, timeouts, retries
@@ -798,7 +798,7 @@ vision_model = get_model("anthropic", "vision")
 
 #### Google AI
 
-- ✅ **Full Bifrost Integration**: Complete custom transport implementation
+- ✅ **Full Flare Integration**: Complete custom transport implementation
 - ✅ **Models**: gemini-2.0-flash-001, gemini-1.5-pro, gemini-1.5-flash, gemini-1.0-pro
 - ✅ **Features**: Chat, tools, vision, multimodal processing
 - ✅ **Settings**: Project ID, location, API configuration
@@ -807,7 +807,7 @@ vision_model = get_model("anthropic", "vision")
 
 #### LiteLLM
 
-- ✅ **Full Bifrost Integration**: Global base URL configuration
+- ✅ **Full Flare Integration**: Global base URL configuration
 - ✅ **Models**: Supports all LiteLLM-compatible models
 - ✅ **Features**: Chat, tools, vision (integration-dependent)
 - ✅ **Settings**: Drop params, debug mode, integration-specific configs
@@ -1152,7 +1152,7 @@ gw0 [11] / gw1 [11] / gw2 [11] / gw3 [11]
 #### Required Variables
 
 ```bash
-# Bifrost gateway (required)
+# Flare gateway (required)
 export BIFROST_BASE_URL="http://localhost:8080"
 
 # Integration API keys (at least one required)
@@ -1506,7 +1506,7 @@ Before submitting your integration implementation:
 - [ ] **Message Conversion**: Proper handling of multimodal messages
 - [ ] **Error Handling**: Graceful handling of unsupported features
 - [ ] **Documentation**: Integration added to README with capabilities
-- [ ] **Bifrost Integration**: Base URL properly configured and tested
+- [ ] **Flare Integration**: Base URL properly configured and tested
 
 ### 🚨 Common Pitfalls
 
@@ -1533,11 +1533,11 @@ ls -la config.yml
 #### 2. Integration Connection Issues
 
 ```bash
-# Error: Connection refused to Bifrost
+# Error: Connection refused to Flare
 ConnectionError: Connection refused to localhost:8080
 
 # Solutions:
-# 1. Check if Bifrost is running
+# 1. Check if Flare is running
 curl http://localhost:8080/health
 
 # 2. Ensure BIFROST_BASE_URL is set correctly
@@ -1625,4 +1625,4 @@ For issues and questions:
 
 ---
 
-**Note**: This test suite is designed for testing AI integrations through Bifrost proxy. Ensure your Bifrost instance is properly configured and running before executing tests. The configuration system provides Bifrost routing for maximum flexibility.
+**Note**: This test suite is designed for testing AI integrations through Flare proxy. Ensure your Flare instance is properly configured and running before executing tests. The configuration system provides Flare routing for maximum flexibility.

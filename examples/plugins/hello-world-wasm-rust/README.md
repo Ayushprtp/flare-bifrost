@@ -1,6 +1,6 @@
-# Bifrost WASM Plugin (Rust)
+# Flare WASM Plugin (Rust)
 
-A comprehensive example of a Bifrost plugin written in Rust and compiled to WebAssembly. This plugin demonstrates proper structure definitions with serde, JSON parsing, context handling, and request/response modification patterns.
+A comprehensive example of a Flare plugin written in Rust and compiled to WebAssembly. This plugin demonstrates proper structure definitions with serde, JSON parsing, context handling, and request/response modification patterns.
 
 ## Prerequisites
 
@@ -81,7 +81,7 @@ This plugin uses `serde` with derive macros for JSON serialization. All structur
 
 ```rust
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct BifrostContext {
+pub struct FlareContext {
     pub request_id: Option<String>,
     
     // Custom values via HashMap
@@ -89,7 +89,7 @@ pub struct BifrostContext {
     pub values: HashMap<String, serde_json::Value>,
 }
 
-impl BifrostContext {
+impl FlareContext {
     pub fn set_value(&mut self, key: &str, value: impl Into<serde_json::Value>);
     pub fn get_string(&self, key: &str) -> Option<&str>;
     pub fn get_bool(&self, key: &str) -> Option<bool>;
@@ -160,7 +160,7 @@ pub struct ChatParameters {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct BifrostChatRequest {
+pub struct FlareChatRequest {
     pub provider: String,
     pub model: String,
     pub input: Vec<ChatMessage>,
@@ -188,7 +188,7 @@ pub struct ResponseChoice {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct BifrostChatResponse {
+pub struct FlareChatResponse {
     pub id: String,
     pub model: String,
     pub choices: Vec<ResponseChoice>,
@@ -198,8 +198,8 @@ pub struct BifrostChatResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct BifrostResponse {
-    pub chat_response: Option<BifrostChatResponse>,
+pub struct FlareResponse {
+    pub chat_response: Option<FlareChatResponse>,
 }
 ```
 
@@ -215,13 +215,13 @@ pub struct ErrorField {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct BifrostError {
+pub struct FlareError {
     pub error: ErrorField,
     pub status_code: Option<i32>,
     pub allow_fallbacks: Option<bool>,
 }
 
-impl BifrostError {
+impl FlareError {
     pub fn new(message: &str) -> Self;
     pub fn with_type(self, error_type: &str) -> Self;
     pub fn with_code(self, code: &str) -> Self;
@@ -234,8 +234,8 @@ impl BifrostError {
 ```rust
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct LLMPluginShortCircuit {
-    pub response: Option<BifrostResponse>,
-    pub error: Option<BifrostError>,
+    pub response: Option<FlareResponse>,
+    pub error: Option<FlareError>,
 }
 ```
 
@@ -368,8 +368,8 @@ pub extern "C" fn pre_hook(input_ptr: u32, input_len: u32) -> u64 {
         };
         
         // Build mock response
-        let mock_response = BifrostResponse {
-            chat_response: Some(BifrostChatResponse {
+        let mock_response = FlareResponse {
+            chat_response: Some(FlareChatResponse {
                 id: format!("mock-{}", input.context.request_id.unwrap_or_default()),
                 model: "mock-model".to_string(),
                 choices: vec![ResponseChoice {
@@ -431,7 +431,7 @@ pub extern "C" fn pre_hook(input_ptr: u32, input_len: u32) -> u64 {
         output.short_circuit = Some(LLMPluginShortCircuit {
             response: None,
             error: Some(
-                BifrostError::new("Rate limit exceeded")
+                FlareError::new("Rate limit exceeded")
                     .with_type("rate_limit")
                     .with_code("429")
                     .with_status(429)
@@ -490,9 +490,9 @@ pub extern "C" fn post_hook(input_ptr: u32, input_len: u32) -> u64 {
 }
 ```
 
-## Usage with Bifrost
+## Usage with Flare
 
-Configure the plugin in your Bifrost config:
+Configure the plugin in your Flare config:
 
 ```json
 {

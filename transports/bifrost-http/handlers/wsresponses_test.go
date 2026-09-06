@@ -121,8 +121,8 @@ func TestCreateBifrostContextFromAuth_SettlesIdentity(t *testing.T) {
 		wantKey  string
 	}{
 		"no credential":       {auth: &authHeaders{}},
-		"virtual key header":  {auth: &authHeaders{virtualKey: "sk-bf-ws"}, wantKind: string(grant.CredentialVirtualKey), wantKey: "sk-bf-ws"},
-		"bearer virtual key":  {auth: &authHeaders{authorization: "Bearer sk-bf-bearer"}, wantKind: string(grant.CredentialVirtualKey), wantKey: "sk-bf-bearer"},
+		"virtual key header":  {auth: &authHeaders{virtualKey: "sk-fx-ws"}, wantKind: string(grant.CredentialVirtualKey), wantKey: "sk-fx-ws"},
+		"bearer virtual key":  {auth: &authHeaders{authorization: "Bearer sk-fx-bearer"}, wantKind: string(grant.CredentialVirtualKey), wantKey: "sk-fx-bearer"},
 		"provider key bearer": {auth: &authHeaders{authorization: "Bearer sk-openai"}},
 	}
 	for name, tc := range cases {

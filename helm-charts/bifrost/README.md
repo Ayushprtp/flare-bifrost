@@ -1,8 +1,8 @@
-# Bifrost Helm Charts
+# Flare Helm Charts
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/bifrost)](https://artifacthub.io/packages/helm/bifrost/bifrost)
 
-Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost) - a high-performance AI gateway with unified interface for multiple providers.
+Official Helm charts for deploying [Flare](https://github.com/maximhq/bifrost) - a high-performance AI gateway with unified interface for multiple providers.
 
 **Latest Version:** 2.1.38
 
@@ -13,7 +13,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 - Fixed disabling SCIM/SSO via Helm having no effect. `bifrost.scim.enabled: false` skipped the `scim_config` block entirely, so the section was absent from the rendered `config.json`, the runtime never reconciled it, and SCIM stayed enabled from the previous state. `bifrost.scim` no longer has a chart default (the block is commented out in `values.yaml`), and `scim_config` is now rendered whenever `bifrost.scim` is declared at all — so `enabled: false` emits `"scim_config": {"enabled": false}` and the disable propagates. Installs that never declare `bifrost.scim` emit nothing, leaving dashboard-configured SCIM untouched.
 - Added `bifrost.client.compat.azureDeepseek` (default `false`) — converts Azure DeepSeek responses requests to chat completions so reasoning is preserved for coding harnesses. Renders into `client.compat.azure_deepseek`.
 - Removed the `version` field from every plugin (`telemetry`, `logging`, `governance`, `maxim`, `semanticCache`, `otel`, `datadog`, `bigquery`, `kafka`, `pubsub`, `splunk` and `birost.plugins.custom[]`).
-- Updated `bifrost.governance.complexityAnalyzerConfig` for semantic Complexity Router configuration: set an embedding provider and model, add reference phrases for Simple, Medium, and Complex, and choose `embedded` or `vector_store` phrase storage. Bifrost detects the embedding dimension during warmup. Legacy four-tier lists remain valid: Simple stays Simple, Code and Technical merge into Medium, and Reasoning merges into Complex. Legacy `tier_boundaries` remain accepted during upgrades but are optional and ignored by semantic routing. Renders into `governance.complexity_analyzer_config`.
+- Updated `bifrost.governance.complexityAnalyzerConfig` for semantic Complexity Router configuration: set an embedding provider and model, add reference phrases for Simple, Medium, and Complex, and choose `embedded` or `vector_store` phrase storage. Flare detects the embedding dimension during warmup. Legacy four-tier lists remain valid: Simple stays Simple, Code and Technical merge into Medium, and Reasoning merges into Complex. Legacy `tier_boundaries` remain accepted during upgrades but are optional and ignored by semantic routing. Renders into `governance.complexity_analyzer_config`.
 - Added `vectorStore.type: chromem` plus a `vectorStore.chromem` block (`path`, `compress`) for the embedded in-process vector store used by semantic complexity routing. Renders into `vector_store.config`.
 - Added `bifrost.governance.complexityAnalyzerConfig.session.enabled` for session-aware Complexity Router behavior. Identified sessions retain their highest observed tier across normally sequential turns for 24 hours of inactivity; overlapping requests for the same session are best-effort and resolve by last writer wins. Renders into `governance.complexity_analyzer_config.session.enabled`.
 - Fixed `postgresql.external.passwordCommand` and `storage.logsStore.postgres.passwordCommand` being unusable: the mutual-exclusion rules in `values.schema.json` tested only for key *presence*, and `values.yaml` ships `password: ""` / `existingSecret: ""` as defaults, so any chart install that set `passwordCommand` failed validation with `'not' failed`. They now check the *value* instead — `password` and `existingSecret` must be empty when `passwordCommand` is set — so RDS IAM auth renders `password_command` into `config_store.config` / `logs_store.config` without needing `password: null` overrides.
@@ -23,7 +23,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 - Added `bifrost.guardrails.rules[].send_all_conversation_turns`. Set it to `false` to make `max_turns_to_send` select the current input plus that many preceding turns; `0` then sends only the current input. Omit the switch to retain legacy `0 = all history` behavior.
 - Added `bifrost.plugins.splunk` — the Splunk HTTP Event Collector (HEC) observability connector (Enterprise): one flattened event per request to `events_index` plus the derived metric set to `metrics_index`, with TLS (`ca_cert` / `insecure_skip_verify`), a content toggle (`disable_content_logging`), request-header capture, and indexer acknowledgement (`indexer_ack`, `ack_poll_interval_ms`, `ack_timeout_ms`, `max_ack_attempts`). Renders into the `splunk` plugin config.
 - Added `bifrost.plugins.otel.config.semaphore_size` and `inject_timeout` (plugin-level, both legacy and `profiles` wrapper shapes, default `10000` / `5`) — cap on concurrent in-flight trace injects and the timeout for a single inject call, so a hung collector can't hold its concurrency slot indefinitely. Renders into `semaphore_size` / `inject_timeout`. `bifrost.plugins.logging.config` accepts the same two keys (`inject_timeout` as a duration string, e.g. `"5s"`), passed through as-is.
-- Added `postgresql.primary.nodeSelector`, `postgresql.primary.tolerations`, and `postgresql.primary.affinity` to the hosted PostgreSQL deployment. Previously only the Bifrost pod itself could be steered (top-level `nodeSelector`/`tolerations`/`affinity`), so on clusters that mix long-lived services with ephemeral autoscaled workloads the hosted database could not be kept off nodes that scale in — and draining the single-replica Postgres takes the gateway down with it. All three default to empty, so rendering is unchanged unless set.
+- Added `postgresql.primary.nodeSelector`, `postgresql.primary.tolerations`, and `postgresql.primary.affinity` to the hosted PostgreSQL deployment. Previously only the Flare pod itself could be steered (top-level `nodeSelector`/`tolerations`/`affinity`), so on clusters that mix long-lived services with ephemeral autoscaled workloads the hosted database could not be kept off nodes that scale in — and draining the single-replica Postgres takes the gateway down with it. All three default to empty, so rendering is unchanged unless set.
 - Added `storage.logsStore.postgres` to point the logs store at a **separate external PostgreSQL** (different host and/or database) than the config store, instead of forcing both onto the shared top-level `postgresql` connection. Only applies when the logs store resolves to postgres; `enabled: false` (default) preserves existing behavior. Fields mirror `postgresql.external` (`host`, `port`, `user`, `password`, `passwordCommand`, `database`, `sslMode`, `connMaxLifetime`, `existingSecret`, `passwordKey`); with `existingSecret` the password is injected as `BIFROST_LOGS_POSTGRES_PASSWORD`. Renders into `logs_store.config`.
 
 ### 2.1.36
@@ -38,7 +38,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 - Added top-level `bifrost.setupToken` — the operator-provisioned bootstrap secret required to create the first admin account when none exists (supports `env.`/`vault.` prefixes and the `BIFROST_SETUP_TOKEN` env var). Renders into `setup_token`.
 - Added `bifrost.server.pluginDownloadPrivateAllowlist` (array of hostnames/IPs/CIDRs) to let custom plugin (`.so`) downloads reach trusted internal hosts that resolve to private/loopback/link-local/CGNAT addresses, blocked by default to prevent SSRF. Renders into `server.plugin_download_private_allowlist`.
 - Added `http2_ping_interval_in_seconds` (0–3600, `0` disables) to provider `network_config` — sends a client-initiated HTTP/2 keepalive PING after that many idle seconds; only applies when `enforce_http2` is set. Renders into `network_config.http2_ping_interval_in_seconds`.
-- Added inline `oauthConfig` to `bifrost.mcp.clientConfigs[]` (`clientId`, `clientSecret`, `authorizeUrl`, `tokenUrl`, `registrationUrl`, `scopes`; all optional) for `authType` `oauth`/`per_user_oauth`, so OAuth can be declared inline instead of pre-creating a config — missing URLs and client IDs are discovered/registered during admin verification. Renders into `oauth_config`. (`oauthConfigId` is now Bifrost-managed and is no longer emitted.)
+- Added inline `oauthConfig` to `bifrost.mcp.clientConfigs[]` (`clientId`, `clientSecret`, `authorizeUrl`, `tokenUrl`, `registrationUrl`, `scopes`; all optional) for `authType` `oauth`/`per_user_oauth`, so OAuth can be declared inline instead of pre-creating a config — missing URLs and client IDs are discovered/registered during admin verification. Renders into `oauth_config`. (`oauthConfigId` is now Flare-managed and is no longer emitted.)
 - Added `tokenExchange` to `bifrost.mcp.clientConfigs[]` (`audience`, `useIdpCredentials`, `clientId`, `clientSecret`, `authorizationServerUrl`, `scopes`) for the new `token_exchange` auth type (Enterprise builds), exchanging each caller's IDP token for a short-lived token scoped to the server's audience. Renders into `token_exchange`.
 - Added `needsSessionStickiness` to `bifrost.mcp.clientConfigs[]` (HTTP servers only) to choose one persistent connection reused across callers (`true`) or a fresh connection per call (`false`, default). Renders into `needs_session_stickiness`.
 - Documented `endpoints` on the `bedrock` and `bedrock_mantle` key examples (AWS PrivateLink interface VPC endpoint hosts: `runtime`, `control_plane`, `mantle`, `agent_runtime`, `s3`). Passes through into `bedrock_key_config.endpoints` / `bedrock_mantle_key_config.endpoints`.
@@ -57,7 +57,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 ### 2.1.32
 
 - Extended `bifrost.accessProfiles[].provider_configs[]` with `blacklisted_models` (denylist that wins over `allowed_models`; `["*"]` blocks every model, while an empty or omitted list blocks none), `weight` (load-balancer seed weight; `null` opts out), and `model_budgets[]` (per-model budget groups; each entry requires `model_name` and may carry optional `budgets[]` and a `rate_limit`). These pass through into `access_profiles[].provider_configs[]`.
-- Added `bifrost.scim.config.additionalScopes` (Okta) — an array of extra OAuth scopes requested on top of the base `openid/profile/email/offline_access` set, for Custom Authorization Servers where claims like `groups` are gated behind a scope Bifrost does not request by default. Passes through into `scim_config.config.additionalScopes`.
+- Added `bifrost.scim.config.additionalScopes` (Okta) — an array of extra OAuth scopes requested on top of the base `openid/profile/email/offline_access` set, for Custom Authorization Servers where claims like `groups` are gated behind a scope Flare does not request by default. Passes through into `scim_config.config.additionalScopes`.
 - Added `bifrost.framework.pricing.liveModelsSyncInterval` (default `3600` seconds, minimum `60`, `0` disables) to control how often each provider's list-models response is re-fetched in the background. Renders into `framework.pricing.live_models_sync_interval`.
 - Added `storage.configStore.connMaxIdleTime` and `storage.logsStore.connMaxIdleTime` (Go duration, e.g. `5m`) to cap how long an idle PostgreSQL connection is kept before closing, so bursts above `maxIdleConns` stop churning physical connections. Each renders into its store's `conn_max_idle_time`.
 - Added `storage.logsStore.matviewRefreshTimeout` (Go duration, min 30s, max 30m; unset derives 5× the refresh interval, at least 5m) to bound a single materialized-view refresh pass. Renders into `logs_store.matview_refresh_timeout`.
@@ -187,7 +187,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 
 ### 2.1.19
 
-- Added `bifrost.modelCatalog.modelParametersUrl` to `values.yaml`, `values.schema.json`, and `_helpers.tpl`, allowing operators to override the URL Bifrost uses to fetch model parameter definitions.
+- Added `bifrost.modelCatalog.modelParametersUrl` to `values.yaml`, `values.schema.json`, and `_helpers.tpl`, allowing operators to override the URL Flare uses to fetch model parameter definitions.
 - Added `existingSecret` support for hosted PostgreSQL (`postgresql.enabled: true`). Set `postgresql.auth.existingSecret` and `postgresql.auth.passwordKey` to reference a Kubernetes secret (e.g. from Vault Secrets Operator) instead of a plaintext password in values. Both the postgres pod and the bifrost pod will read the password from the secret; the chart-managed secret is not created when `existingSecret` is set.
 - Added `postgresql.primary.podSecurityContext` and `postgresql.primary.containerSecurityContext` to allow configuring pod- and container-level security contexts on the hosted PostgreSQL deployment. Defaults to `podSecurityContext: { fsGroup: 999 }` (preserving prior behaviour) and `containerSecurityContext: {}` (no container security context). Required for clusters enforcing strict Kyverno/OPA policies (e.g. `runAsNonRoot`, `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `seccompProfile`).
 - Added `bifrost.featureFlags` map to `values.yaml` and `_helpers.tpl`. Renders into `feature_flags.flags` in the generated config JSON. Each entry accepts a literal boolean or `"env.NAME"` string.
@@ -199,7 +199,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 
 ### 2.1.18
 
-- Added `bifrost.framework.pricing.modelParametersUrl` to `values.yaml`, `values.schema.json`, and `_helpers.tpl`, allowing operators to override the URL Bifrost uses to fetch model parameter definitions.
+- Added `bifrost.framework.pricing.modelParametersUrl` to `values.yaml`, `values.schema.json`, and `_helpers.tpl`, allowing operators to override the URL Flare uses to fetch model parameter definitions.
 
 ### 2.1.17
 
@@ -340,7 +340,7 @@ Official Helm charts for deploying [Bifrost](https://github.com/maximhq/bifrost)
 
 ### v2.1.2
 
-- Removed `encryption_key` requirement — field is now optional; Bifrost will operate without encryption when omitted
+- Removed `encryption_key` requirement — field is now optional; Flare will operate without encryption when omitted
 
 ### v2.1.1
 
@@ -464,7 +464,7 @@ This release fixes the multi-attach volume error when running multiple replicas 
 
 #### What Changed
 
-- When using `storage.mode: sqlite` with `storage.persistence.enabled: true`, Bifrost now deploys as a **StatefulSet** instead of a Deployment
+- When using `storage.mode: sqlite` with `storage.persistence.enabled: true`, Flare now deploys as a **StatefulSet** instead of a Deployment
 - Each pod gets its own dedicated PersistentVolumeClaim (e.g., `data-bifrost-0`, `data-bifrost-1`, `data-bifrost-2`)
 - A headless service is created for StatefulSet DNS resolution
 - HorizontalPodAutoscaler now correctly references StatefulSet or Deployment based on storage configuration
@@ -498,13 +498,13 @@ Since Kubernetes doesn't allow in-place conversion from Deployment to StatefulSe
 ## Quick Start
 
 ```bash
-# Add the Bifrost Helm repository
+# Add the Flare Helm repository
 helm repo add bifrost https://maximhq.github.io/bifrost/helm-charts
 
 # Update your local Helm chart repository cache
 helm repo update
 
-# Install Bifrost with default configuration (SQLite storage)
+# Install Flare with default configuration (SQLite storage)
 helm install bifrost bifrost/bifrost --set image.tag=v1.4.3
 ```
 
@@ -600,7 +600,7 @@ only v1.6.4+ images make the data directory group-0-owned and group-writable
 at build time; earlier images assume UID 1000 owns `/app/data` and fail to
 write `config.db` under an arbitrary UID.
 
-The Bifrost image supports arbitrary UIDs with group 0: the data directory is
+The Flare image supports arbitrary UIDs with group 0: the data directory is
 owned by group 0 and group-writable at build time, so the restricted-v2 UID
 (with GID 0) can write `config.db` and `logs.db` — no custom SCC or `anyuid` is
 needed.
@@ -673,7 +673,7 @@ kubectl create secret docker-registry my-registry-secret \
 
 ### Storage Configuration
 
-Bifrost supports two storage backends (SQLite and PostgreSQL) that can be configured independently for config and logs stores.
+Flare supports two storage backends (SQLite and PostgreSQL) that can be configured independently for config and logs stores.
 
 | Parameter                                      | Description                                                             | Default                    |
 | ---------------------------------------------- | ----------------------------------------------------------------------- | -------------------------- |
@@ -797,7 +797,7 @@ postgresql:
 
 ### Vector Store Configuration (Semantic Caching)
 
-Bifrost supports multiple vector stores for semantic caching:
+Flare supports multiple vector stores for semantic caching:
 
 | Parameter             | Description                                              | Default |
 | --------------------- | -------------------------------------------------------- | ------- |
@@ -846,7 +846,7 @@ vectorStore:
     #   host: "qdrant.example.com"
 ```
 
-### Bifrost Application Configuration
+### Flare Application Configuration
 
 | Parameter               | Description                       | Default   |
 | ----------------------- | --------------------------------- | --------- |
@@ -1133,9 +1133,9 @@ helm uninstall bifrost
 kubectl delete pvc -l app.kubernetes.io/name=bifrost
 ```
 
-## Accessing Bifrost
+## Accessing Flare
 
-After installation, access Bifrost using one of these methods:
+After installation, access Flare using one of these methods:
 
 ### Port Forwarding (Development)
 
@@ -1157,7 +1157,7 @@ Configure the `ingress` section as shown above.
 
 ## Monitoring
 
-Bifrost exposes Prometheus metrics at `/metrics`:
+Flare exposes Prometheus metrics at `/metrics`:
 
 ```bash
 # Get metrics
@@ -1223,7 +1223,7 @@ kubectl get secret bifrost -o yaml
 
 ## Resources
 
-- [Bifrost Documentation](https://docs.getbifrost.ai)
+- [Flare Documentation](https://docs.getbifrost.ai)
 - [GitHub Repository](https://github.com/maximhq/bifrost)
 - [Docker Hub](https://hub.docker.com/r/maximhq/bifrost)
 - [Discord Community](https://discord.gg/exN5KAydbU)

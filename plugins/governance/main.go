@@ -27,7 +27,7 @@ const PluginName = "governance"
 const (
 	governanceRejectedContextKey schemas.BifrostContextKey = "bf-governance-rejected"
 
-	VirtualKeyPrefix = "sk-bf-"
+	VirtualKeyPrefix = "sk-fx-"
 )
 
 // Config is the configuration for the governance plugin

@@ -1,13 +1,13 @@
 # Token Exchange (On-Behalf-Of) Demo MCP Server
 
-A plain MCP resource server for exercising Bifrost's `token_exchange` MCP auth
+A plain MCP resource server for exercising Flare's `token_exchange` MCP auth
 type against a **real identity provider** — Okta, Microsoft Entra, Keycloak,
 Auth0, or any generic OIDC provider.
 
 ## What is This?
 
-`token_exchange` moves the entire delegation dance into Bifrost and your
-identity provider: on every tool call, Bifrost exchanges the caller's own
+`token_exchange` moves the entire delegation dance into Flare and your
+identity provider: on every tool call, Flare exchanges the caller's own
 identity-provider token for one scoped to this server's audience and sends
 only the exchanged token upstream. This server has no OAuth server logic of
 its own — its only job is what a real internal MCP server behind token
@@ -33,8 +33,8 @@ You'll need:
 - Your identity provider's **issuer URL** (its OIDC discovery document must
   be reachable at `<issuer>/.well-known/openid-configuration`)
 - The **audience** you registered the exchange application against
-- The exchange application's **client ID**, for the Bifrost side
-- The exchange application's **client secret**, for the Bifrost side —
+- The exchange application's **client ID**, for the Flare side
+- The exchange application's **client secret**, for the Flare side —
   optional, depending on your identity provider and whether the application
   is registered as a public or confidential client
 
@@ -66,7 +66,7 @@ Output:
 token-exchange-demo-server listening on http://localhost:3004/
 Validating bearer tokens against issuer=https://your-domain.okta.com/oauth2/your-auth-server-id audience=api://your-mcp-server
 
-Bifrost config:
+Flare config:
 
 {
   "name": "token_exchange_demo",
@@ -82,11 +82,11 @@ Bifrost config:
 }
 ```
 
-## Connecting via Bifrost
+## Connecting via Flare
 
 Use the printed config above, filling in your exchange application's
 `client_id` / `client_secret`. `auth_type: "token_exchange"` requires your
-Bifrost deployment's identity-provider integration to be configured and
+Flare deployment's identity-provider integration to be configured and
 pointed at the same identity provider — see
 [Token Exchange auth](../../../docs/mcp/auth/token-exchange.mdx#prerequisites).
 
@@ -152,9 +152,9 @@ This example intentionally:
 - ✅ Rejects with HTTP 401 on any validation failure, before the MCP server
   processes the request
 - ❌ Does NOT implement any OAuth authorization-server endpoints — that's
-  entirely Bifrost + your identity provider's job under `token_exchange`
+  entirely Flare + your identity provider's job under `token_exchange`
 - ❌ Does NOT cache or store anything about the caller — every request is
-  validated fresh, mirroring how Bifrost itself never persists a caller's
+  validated fresh, mirroring how Flare itself never persists a caller's
   exchanged token to disk
 
 ## See Also

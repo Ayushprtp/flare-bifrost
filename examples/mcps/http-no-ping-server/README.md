@@ -1,14 +1,14 @@
 # HTTP MCP Server Without Ping Support
 
-This is a sample MCP server implementation that runs over HTTP but **does not support the optional `ping` method**. This demonstrates how to configure Bifrost to use the `listTools` health check method instead of ping.
+This is a sample MCP server implementation that runs over HTTP but **does not support the optional `ping` method**. This demonstrates how to configure Flare to use the `listTools` health check method instead of ping.
 
 ## What is This?
 
 Many MCP servers may not implement the optional `ping` method from the MCP specification. This example shows:
 
 1. **How to build an MCP server** that only supports the core methods (`list_tools`, `call_tool`) but not `ping`
-2. **How to configure Bifrost** to work with such servers using `is_ping_available: false`
-3. **Why this matters**: When `is_ping_available` is `false`, Bifrost will use `listTools` for health checks instead of the lightweight `ping` method
+2. **How to configure Flare** to work with such servers using `is_ping_available: false`
+3. **Why this matters**: When `is_ping_available` is `false`, Flare will use `listTools` for health checks instead of the lightweight `ping` method
 
 ## Running the Server
 
@@ -28,10 +28,10 @@ go run main.go
 Output:
 ```
 MCP server listening on http://localhost:3001/mcp
-Note: This server does NOT support ping. Use is_ping_available=false in Bifrost config.
+Note: This server does NOT support ping. Use is_ping_available=false in Flare config.
 ```
 
-## Connecting via Bifrost
+## Connecting via Flare
 
 ### Configuration (config.json)
 
@@ -119,10 +119,10 @@ Greets someone by name.
 
 ## Health Check Behavior
 
-When you add this server to Bifrost with `is_ping_available: false`:
+When you add this server to Flare with `is_ping_available: false`:
 
-1. Bifrost will **NOT** send `ping` requests (since the server doesn't support them)
-2. Instead, Bifrost will use `listTools` every 10 seconds to check server health
+1. Flare will **NOT** send `ping` requests (since the server doesn't support them)
+2. Instead, Flare will use `listTools` every 10 seconds to check server health
 3. If `listTools` fails 5 consecutive times, the server will be marked as `disconnected`
 
 **Why `listTools` instead of `ping`?**
@@ -153,7 +153,7 @@ This allows us to:
 - ✅ Keep the simple mcp-go server implementation
 - ✅ Transparently block ping requests at the HTTP layer
 - ✅ Return proper JSON-RPC error responses
-- ✅ Demonstrate the `is_ping_available=false` behavior in Bifrost
+- ✅ Demonstrate the `is_ping_available=false` behavior in Flare
 
 ## Key Learning: is_ping_available
 
@@ -167,5 +167,5 @@ The `is_ping_available` setting is important because:
 ## See Also
 
 - [MCP Specification](https://spec.modelcontextprotocol.io/)
-- [Bifrost MCP Documentation](../../docs/mcp/connecting-to-servers.mdx)
+- [Flare MCP Documentation](../../docs/mcp/connecting-to-servers.mdx)
 - [Health Monitoring Guide](../../docs/mcp/connecting-to-servers.mdx#health-monitoring)

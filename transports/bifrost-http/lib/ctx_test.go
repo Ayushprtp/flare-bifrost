@@ -456,10 +456,10 @@ func TestConvertToBifrostContext_DirectKey_BearerRealKey(t *testing.T) {
 }
 
 func TestConvertToBifrostContext_DirectKey_VirtualKeyNotBypassed(t *testing.T) {
-	// A virtual key (sk-bf-*) in Authorization must not be treated as a direct key.
+	// A virtual key (sk-fx-*) in Authorization must not be treated as a direct key.
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.Header.Set("x-bf-direct-key", "true")
-	ctx.Request.Header.Set("Authorization", "Bearer sk-bf-virtual-key-here")
+	ctx.Request.Header.Set("Authorization", "Bearer sk-fx-virtual-key-here")
 
 	bifrostCtx, cancel := ConvertToBifrostContext(ctx, testHandlerStore{allowDirectKeys: true})
 	defer cancel()
@@ -532,7 +532,7 @@ func TestConvertToBifrostContext_DirectKey_RawVirtualKeyNotBypassed(t *testing.T
 	// VK sent without Bearer prefix must also be excluded from direct key path.
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.Header.Set("x-bf-direct-key", "true")
-	ctx.Request.Header.Set("Authorization", "sk-bf-virtual-key-no-bearer-prefix")
+	ctx.Request.Header.Set("Authorization", "sk-fx-virtual-key-no-bearer-prefix")
 
 	bifrostCtx, cancel := ConvertToBifrostContext(ctx, testHandlerStore{allowDirectKeys: true})
 	defer cancel()
@@ -610,19 +610,19 @@ func TestBuildBaseURL(t *testing.T) {
 // governance/logging attribute the call to the VK, not the base key.
 func TestConvertToBifrostContext_VirtualKeyFromAzureAPIKeyHeader(t *testing.T) {
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("api-key", "sk-bf-azure-passthrough-vk")
+	ctx.Request.Header.Set("api-key", "sk-fx-azure-passthrough-vk")
 
 	bifrostCtx, cancel := ConvertToBifrostContext(ctx, testHandlerStore{})
 	defer cancel()
 
 	vk, ok := bifrostCtx.Value(schemas.BifrostContextKeyVirtualKey).(string)
-	if !ok || vk != "sk-bf-azure-passthrough-vk" {
-		t.Fatalf("virtual key = %#v, want %q", bifrostCtx.Value(schemas.BifrostContextKeyVirtualKey), "sk-bf-azure-passthrough-vk")
+	if !ok || vk != "sk-fx-azure-passthrough-vk" {
+		t.Fatalf("virtual key = %#v, want %q", bifrostCtx.Value(schemas.BifrostContextKeyVirtualKey), "sk-fx-azure-passthrough-vk")
 	}
 }
 
 // A real (non-VK) provider key in the "api-key" header must not be misread as
-// a virtual key — only the sk-bf- prefix promotes it.
+// a virtual key — only the sk-fx- prefix promotes it.
 func TestConvertToBifrostContext_APIKeyHeaderNonVirtualKeyIgnored(t *testing.T) {
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.Header.Set("api-key", "real-azure-api-key")

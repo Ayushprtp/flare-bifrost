@@ -11,16 +11,16 @@ import (
 // transport context extractor.
 func TestParseVirtualKeyFromFastHTTPRequest_VirtualKeyFromAzureAPIKeyHeader(t *testing.T) {
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("api-key", "sk-bf-azure-passthrough-vk")
+	ctx.Request.Header.Set("api-key", "sk-fx-azure-passthrough-vk")
 
 	vk := ParseVirtualKeyFromFastHTTPRequest(ctx)
-	if vk == nil || *vk != "sk-bf-azure-passthrough-vk" {
-		t.Fatalf("virtual key = %#v, want %q", vk, "sk-bf-azure-passthrough-vk")
+	if vk == nil || *vk != "sk-fx-azure-passthrough-vk" {
+		t.Fatalf("virtual key = %#v, want %q", vk, "sk-fx-azure-passthrough-vk")
 	}
 }
 
 // A real (non-VK) provider key in the "api-key" header must not be misread as
-// a virtual key — only the sk-bf- prefix promotes it.
+// a virtual key — only the sk-fx- prefix promotes it.
 func TestParseVirtualKeyFromFastHTTPRequest_APIKeyHeaderNonVirtualKeyIgnored(t *testing.T) {
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.Header.Set("api-key", "real-azure-api-key")

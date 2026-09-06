@@ -189,7 +189,7 @@ func TestExtractBearerJWT(t *testing.T) {
 	}{
 		{name: "jwt bearer", header: "Bearer eyJhbGciOiJSUzI1NiJ9.x.y", want: "eyJhbGciOiJSUzI1NiJ9.x.y"},
 		{name: "case-insensitive scheme", header: "bearer eyJabc", want: "eyJabc"},
-		{name: "virtual key is not a jwt", header: "Bearer sk-bf-abc123", want: ""},
+		{name: "virtual key is not a jwt", header: "Bearer sk-fx-abc123", want: ""},
 		{name: "non-bearer scheme", header: "Basic eyJabc", want: ""},
 		{name: "empty header", header: "", want: ""},
 		{name: "bearer without token", header: "Bearer ", want: ""},
@@ -400,7 +400,7 @@ func TestCachedSigningKey_ConfigFaults(t *testing.T) {
 }
 
 func TestInjectJWTContext(t *testing.T) {
-	activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-bf-active")}
+	activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-fx-active")}
 
 	t.Run("user mode sets user id", func(t *testing.T) {
 		bc := schemas.NewBifrostContext(context.Background(), time.Time{})
@@ -417,7 +417,7 @@ func TestInjectJWTContext(t *testing.T) {
 			RegisteredClaims: jwt.RegisteredClaims{Subject: "vk-row-1"}, BfMode: "vk",
 		}, activeVK)
 		require.NoError(t, err)
-		assert.Equal(t, "sk-bf-active", bc.Value(schemas.BifrostContextKeyVirtualKey))
+		assert.Equal(t, "sk-fx-active", bc.Value(schemas.BifrostContextKeyVirtualKey))
 		// The VK row ID is resolved later by governance's PreMCPConnectionHook from
 		// the value, not stamped here — mirrors the x-bf-vk header path.
 		assert.Nil(t, bc.Value(schemas.BifrostContextKeyGovernanceVirtualKeyID))

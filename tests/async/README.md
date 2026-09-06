@@ -1,6 +1,6 @@
 # Async Inference E2E Tests
 
-End-to-end tests for Bifrost's async inference feature (`/v1/async/*` endpoints and integration route headers).
+End-to-end tests for Flare's async inference feature (`/v1/async/*` endpoints and integration route headers).
 
 ## Running
 
@@ -18,7 +18,7 @@ BIFROST_VK=sk-bf-... BIFROST_ALT_VK=sk-bf-... go test ./... -timeout 300s
 
 | Variable | Default | Description |
 |---|---|---|
-| `BIFROST_BASE_URL` | `http://localhost:8080` | Bifrost gateway URL |
+| `BIFROST_BASE_URL` | `http://localhost:8080` | Flare gateway URL |
 | `BIFROST_VK` | — | Primary virtual key; enables VK-mode tests |
 | `BIFROST_ALT_VK` | — | Second virtual key; enables cross-VK auth tests |
 | `BIFROST_POLL_TIMEOUT` | `30s` | Max time to wait for a job to reach terminal state |

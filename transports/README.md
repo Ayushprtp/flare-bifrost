@@ -1,6 +1,6 @@
-# Bifrost Gateway
+# Flare Gateway
 
-Bifrost Gateway is a blazing-fast HTTP API that unifies access to 15+ AI providers (OpenAI, Anthropic, AWS Bedrock, Google Vertex, and more) through a single OpenAI-compatible interface. Deploy in seconds with zero configuration and get automatic fallbacks, semantic caching, tool calling, and enterprise-grade features.
+Flare Gateway is a blazing-fast HTTP API that unifies access to 15+ AI providers (OpenAI, Anthropic, AWS Bedrock, Google Vertex, and more) through a single OpenAI-compatible interface. Deploy in seconds with zero configuration and get automatic fallbacks, semantic caching, tool calling, and enterprise-grade features.
 
 **Complete Documentation**: [https://docs.getbifrost.ai](https://docs.getbifrost.ai)
 
@@ -24,7 +24,7 @@ npx -y @maximhq/bifrost
 #### Docker
 
 ```bash
-# Pull and run Bifrost Gateway
+# Pull and run Flare Gateway
 docker pull maximhq/bifrost
 docker run -p 8080:8080 maximhq/bifrost
 
@@ -34,7 +34,7 @@ docker run -p 8080:8080 -v $(pwd)/data:/app/data maximhq/bifrost
 
 ### Configuration
 
-Bifrost starts with zero configuration needed. Configure providers through the **built-in web UI** at `http://localhost:8080` or via API:
+Flare starts with zero configuration needed. Configure providers through the **built-in web UI** at `http://localhost:8080` or via API:
 
 ```bash
 # Add OpenAI provider via API
@@ -65,7 +65,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "openai/gpt-4o-mini",
-    "messages": [{"role": "user", "content": "Hello, Bifrost!"}]
+    "messages": [{"role": "user", "content": "Hello, Flare!"}]
   }'
 ```
 
@@ -75,7 +75,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ## Key Features
 
-Bifrost Gateway provides enterprise-grade AI infrastructure with these core capabilities:
+Flare Gateway provides enterprise-grade AI infrastructure with these core capabilities:
 
 ### Core Features
 
@@ -107,7 +107,7 @@ Bifrost Gateway provides enterprise-grade AI infrastructure with these core capa
 
 ## SDK Integrations
 
-Replace your existing SDK base URLs to unlock Bifrost's features instantly:
+Replace your existing SDK base URLs to unlock Flare's features instantly:
 
 ### OpenAI SDK
 
@@ -115,7 +115,7 @@ Replace your existing SDK base URLs to unlock Bifrost's features instantly:
 import openai
 client = openai.OpenAI(
     base_url="http://localhost:8080/openai",
-    api_key="dummy"  # Handled by Bifrost
+    api_key="dummy"  # Handled by Flare
 )
 ```
 
@@ -125,7 +125,7 @@ client = openai.OpenAI(
 import anthropic
 client = anthropic.Anthropic(
     base_url="http://localhost:8080/anthropic",
-    api_key="dummy"  # Handled by Bifrost
+    api_key="dummy"  # Handled by Flare
 )
 ```
 
@@ -136,7 +136,7 @@ import google.generativeai as genai
 genai.configure(
     transport="rest",
     api_endpoint="http://localhost:8080/genai",
-    api_key="dummy"  # Handled by Bifrost
+    api_key="dummy"  # Handled by Flare
 )
 ```
 

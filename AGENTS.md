@@ -1,10 +1,10 @@
-# AGENTS.md — Bifrost AI Gateway
+# AGENTS.md — Flare AI Gateway
 
 > Context for AI agents (Claude Code, Copilot, Cursor, etc.) working on this codebase. Read this fully before making changes.
 
-## What is Bifrost?
+## What is Flare?
 
-Bifrost is a high-performance AI gateway that unifies 20+ LLM providers behind a single OpenAI-compatible API with ~11µs overhead at 5,000 RPS. It also serves as an MCP (Model Context Protocol) gateway, turning static chat models into tool-calling agents.
+Flare is a high-performance AI gateway that unifies 20+ LLM providers behind a single OpenAI-compatible API with ~11µs overhead at 5,000 RPS. It also serves as an MCP (Model Context Protocol) gateway, turning static chat models into tool-calling agents.
 
 GitHub: `maximhq/bifrost`
 
@@ -19,10 +19,10 @@ bifrost/
 │   ├── inference.go                # Inference routing, fallbacks, streaming dispatch (~1.9K lines)
 │   ├── mcp.go                     # MCP integration entry point
 │   ├── schemas/                   # ALL shared Go types — 41 files
-│   │   ├── bifrost.go             # BifrostConfig, ModelProvider enum, RequestType enum, context keys
+│   │   ├── bifrost.go             # FlareConfig, ModelProvider enum, RequestType enum, context keys
 │   │   ├── provider.go            # Provider interface (30+ methods), NetworkConfig, ProviderConfig
 │   │   ├── plugin.go              # LLMPlugin, MCPPlugin, HTTPTransportPlugin, ObservabilityPlugin
-│   │   ├── context.go             # BifrostContext (custom context.Context with mutable values)
+│   │   ├── context.go             # FlareContext (custom context.Context with mutable values)
 │   │   ├── chatcompletions.go     # Chat completion request/response types
 │   │   ├── responses.go           # OpenAI Responses API types
 │   │   ├── embedding.go           # Embedding types
@@ -129,7 +129,7 @@ bifrost/
 
 ## Go Workspace
 
-Bifrost is a **multi-module Go workspace**. Each module has its own `go.mod`:
+Flare is a **multi-module Go workspace**. Each module has its own `go.mod`:
 
 ```
 go.work
@@ -195,7 +195,7 @@ make fmt                                 # Format code
 ```
 Client HTTP Request
   → FastHTTP Transport (parsing, validation ~2µs)
-    → SDK Integration Layer (OpenAI/Anthropic/Bedrock format → Bifrost format)
+    → SDK Integration Layer (OpenAI/Anthropic/Bedrock format → Flare format)
       → Middleware Chain (lib.ChainMiddlewares, applied per-route)
         → HTTPTransportPreHook (HTTP-level plugins, can short-circuit)
           → PreLLMHook Pipeline (auth, rate-limit, cache check — registration order)
@@ -218,40 +218,40 @@ Client HTTP Request
 - **Channel-based async**: Request routing uses Go channels (`chan *ChannelMessage`), not mutexes. The `ProviderQueue` struct manages channel lifecycle with atomic flags.
 - **Object pooling everywhere**: `sync.Pool` wrappers reduce GC pressure. Pools exist for: channel messages, response channels, error channels, stream channels, plugin pipelines, MCP requests, HTTP request/response objects, scanner buffers.
 - **Plugin pipeline symmetry**: Pre-hooks execute in registration order, post-hooks in **reverse** order (LIFO). For every pre-hook executed, the corresponding post-hook is guaranteed to run.
-- **Streaming**: SSE chunks flow through `chan chan *schemas.BifrostStreamChunk`. Accumulated into full response for post-hooks via `framework/streaming/accumulator.go`.
+- **Streaming**: SSE chunks flow through `chan chan *schemas.FlareStreamChunk`. Accumulated into full response for post-hooks via `framework/streaming/accumulator.go`.
 
-### BifrostContext — Custom Context
+### FlareContext — Custom Context
 
-`BifrostContext` (`core/schemas/context.go`) is a custom `context.Context` with **thread-safe mutable values**. Unlike standard Go contexts, values can be set after creation:
+`FlareContext` (`core/schemas/context.go`) is a custom `context.Context` with **thread-safe mutable values**. Unlike standard Go contexts, values can be set after creation:
 
 ```go
-ctx := schemas.NewBifrostContext(parent, deadline)
+ctx := schemas.NewFlareContext(parent, deadline)
 ctx.SetValue(key, value)     // Thread-safe, uses RWMutex
 ctx.WithValue(key, value)    // Chainable variant
 ```
 
-**Reserved context keys** (set by Bifrost internals — DO NOT set manually):
-- `BifrostContextKeySelectedKeyID/Name` — Set by governance plugin
-- `BifrostContextKeyGovernance*` — Set by governance plugin
-- `BifrostContextKeyNumberOfRetries`, `BifrostContextKeyFallbackIndex` — Set by retry/fallback logic
-- `BifrostContextKeyStreamEndIndicator` — Set by streaming infrastructure
-- `BifrostContextKeyTrace*`, `BifrostContextKeySpan*` — Set by tracing middleware
+**Reserved context keys** (set by Flare internals — DO NOT set manually):
+- `FlareContextKeySelectedKeyID/Name` — Set by governance plugin
+- `FlareContextKeyGovernance*` — Set by governance plugin
+- `FlareContextKeyNumberOfRetries`, `FlareContextKeyFallbackIndex` — Set by retry/fallback logic
+- `FlareContextKeyStreamEndIndicator` — Set by streaming infrastructure
+- `FlareContextKeyTrace*`, `FlareContextKeySpan*` — Set by tracing middleware
 
 **User-settable keys** (plugins and handlers can set these):
-- `BifrostContextKeyVirtualKey` (`x-bf-vk`) — Virtual key for governance
-- `BifrostContextKeyAPIKeyName` (`x-bf-api-key`) — Explicit key selection by name
-- `BifrostContextKeyAPIKeyID` (`x-bf-api-key-id`) — Explicit key selection by ID (takes priority over name)
-- `BifrostContextKeyRequestID` — Request ID
-- `BifrostContextKeyExtraHeaders` — Extra headers to forward to provider
-- `BifrostContextKeyURLPath` — Custom URL path for provider
-- `BifrostContextKeySkipKeySelection` — Skip key selection (pass empty key)
-- `BifrostContextKeyUseRawRequestBody` — Send raw body directly to provider
+- `FlareContextKeyVirtualKey` (`x-bf-vk`) — Virtual key for governance
+- `FlareContextKeyAPIKeyName` (`x-bf-api-key`) — Explicit key selection by name
+- `FlareContextKeyAPIKeyID` (`x-bf-api-key-id`) — Explicit key selection by ID (takes priority over name)
+- `FlareContextKeyRequestID` — Request ID
+- `FlareContextKeyExtraHeaders` — Extra headers to forward to provider
+- `FlareContextKeyURLPath` — Custom URL path for provider
+- `FlareContextKeySkipKeySelection` — Skip key selection (pass empty key)
+- `FlareContextKeyUseRawRequestBody` — Send raw body directly to provider
 
 **Gotcha**: `BlockRestrictedWrites()` silently drops writes to reserved keys. This prevents plugins from accidentally overwriting internal state.
 
-**Hard rule — never store stream-sized data in `BifrostContext`.** Context holds small handles only: IDs, durations, booleans, interface pointers. Any per-request state that scales with stream content (chunk buffers, accumulated payloads, replay queues, large per-request slices/maps) must live in a top-level manager keyed by `RequestID`, not in `ctx`. Reference implementations:
+**Hard rule — never store stream-sized data in `FlareContext`.** Context holds small handles only: IDs, durations, booleans, interface pointers. Any per-request state that scales with stream content (chunk buffers, accumulated payloads, replay queues, large per-request slices/maps) must live in a top-level manager keyed by `RequestID`, not in `ctx`. Reference implementations:
 
-- `framework/streaming.Accumulator` — owns a `sync.Map` of per-stream `StreamAccumulator` entries keyed by `RequestID`. Only `BifrostContextKeyAccumulatorID` (the ID string) is stored on the context; the chunk buffers live in the manager. The pause/resume gate (`gate.go`) extends the same per-stream entry with a state machine — again, **no buffer in ctx**.
+- `framework/streaming.Accumulator` — owns a `sync.Map` of per-stream `StreamAccumulator` entries keyed by `RequestID`. Only `FlareContextKeyAccumulatorID` (the ID string) is stored on the context; the chunk buffers live in the manager. The pause/resume gate (`gate.go`) extends the same per-stream entry with a state machine — again, **no buffer in ctx**.
 - The `Tracer` interface (in ctx as a small pointer) is the access path for plugins/providers to reach managers without putting bulky data on the context itself.
 
 When in doubt: if your new ctx key would hold a slice/map that grows with request content, route the storage through a manager and keep only the ID in ctx.
@@ -271,7 +271,7 @@ core/providers/<name>/
 ├── <name>_test.go         # Tests
 ├── types.go               # ALL provider-specific structs (PascalCase prefixed with provider name)
 ├── utils.go               # Constants, base URLs, helpers (camelCase for unexported)
-├── errors.go              # Error parsing: provider HTTP error → *schemas.BifrostError
+├── errors.go              # Error parsing: provider HTTP error → *schemas.FlareError
 ├── chat.go                # Chat request/response converters
 ├── embedding.go           # Embedding converters (if supported)
 ├── images.go              # Image generation (if supported)
@@ -287,8 +287,8 @@ core/providers/<name>/
 ```
 
 **Converter function naming convention:**
-- `To<ProviderName><Feature>Request()` — Bifrost schema → Provider API format
-- `ToBifrost<Feature>Response()` — Provider API format → Bifrost schema
+- `To<ProviderName><Feature>Request()` — Flare schema → Provider API format
+- `ToFlare<Feature>Response()` — Provider API format → Flare schema
 - These must be **pure transformation functions** — no HTTP calls, no logging, no side effects
 
 **Provider constructor pattern:**
@@ -326,16 +326,16 @@ func NewProvider(config schemas.ProviderConfig) (*Provider, error) {
 - `File*` (Upload, List, Retrieve, Delete, Content)
 - `Container*` and `ContainerFile*` (Create, List, Retrieve, Delete, Content)
 
-**Streaming methods** receive a `PostHookRunner` callback and return `chan *BifrostStreamChunk`:
+**Streaming methods** receive a `PostHookRunner` callback and return `chan *FlareStreamChunk`:
 ```go
-ChatCompletionStream(ctx *BifrostContext, postHookRunner PostHookRunner, key Key, request *BifrostChatRequest) (chan *BifrostStreamChunk, *BifrostError)
+ChatCompletionStream(ctx *FlareContext, postHookRunner PostHookRunner, key Key, request *FlareChatRequest) (chan *FlareStreamChunk, *FlareError)
 ```
 
 ### Error Handling
 
 Each provider has `errors.go` with an `ErrorConverter` function:
 ```go
-type ErrorConverter func(resp *fasthttp.Response, requestType schemas.RequestType, providerName schemas.ModelProvider, model string) *schemas.BifrostError
+type ErrorConverter func(resp *fasthttp.Response, requestType schemas.RequestType, providerName schemas.ModelProvider, model string) *schemas.FlareError
 ```
 
 The shared utility `providerUtils.HandleProviderAPIError()` handles common HTTP error parsing. Provider-specific parsers add extra field mapping. Errors always carry metadata:
@@ -360,7 +360,7 @@ Four plugin interfaces exist:
 - Plugin errors are **logged as warnings**, never returned to the caller
 - Pre-hooks can **short-circuit** by returning `*LLMPluginShortCircuit` (cache hit, auth failure, rate limit)
 - Post-hooks receive both response and error — either can be nil. Plugins can **recover from errors** (set error to nil, provide response) or **invalidate responses** (set response to nil, provide error)
-- `BifrostError.AllowFallbacks` controls whether fallback providers are tried: `nil` or `&true` = allow, `&false` = block
+- `FlareError.AllowFallbacks` controls whether fallback providers are tried: `nil` or `&true` = allow, `&false` = block
 - `HTTPTransportStreamChunkHook` is called **per-chunk** during streaming — can modify, skip, or abort the stream
 
 ### Pool System
@@ -388,7 +388,7 @@ defer schemas.ReleaseHTTPRequest(req)  // Clears all maps and fields, returns to
 **Handler pattern:** Handlers are structs with injected dependencies:
 ```go
 type CompletionHandler struct {
-    client       *bifrost.Bifrost
+    client       *bifrost.Flare
     handlerStore lib.HandlerStore
     config       *lib.Config
 }
@@ -396,7 +396,7 @@ type CompletionHandler struct {
 
 **Route registration:** Each handler implements `RegisterRoutes(router, middlewares...)` — routes get middleware chains applied per-route via `lib.ChainMiddlewares()`.
 
-**SDK integration layers** (`transports/bifrost-http/integrations/`) provide request/response converters between provider-native SDK formats and Bifrost's internal format. This enables drop-in replacement of OpenAI SDK, Anthropic SDK, AWS Bedrock SDK, Google GenAI SDK, LangChain, and LiteLLM.
+**SDK integration layers** (`transports/bifrost-http/integrations/`) provide request/response converters between provider-native SDK formats and Flare's internal format. This enables drop-in replacement of OpenAI SDK, Anthropic SDK, AWS Bedrock SDK, Google GenAI SDK, LangChain, and LiteLLM.
 
 ---
 
@@ -470,13 +470,13 @@ When a provider fails and the request falls to a fallback, the **entire plugin p
 
 A **nil** `*AllowedRequests` means "all operations allowed." A **non-nil** value only allows fields explicitly set to `true`. This applies to both `ProviderConfig.AllowedRequests` and `CustomProviderConfig.AllowedRequests`.
 
-### 11. BifrostContext Reserved Keys Are Silently Dropped
+### 11. FlareContext Reserved Keys Are Silently Dropped
 
 When `BlockRestrictedWrites()` is active, writes to reserved keys (governance IDs, retry counts, fallback index, etc.) are **silently ignored** — no error. If your plugin needs to pass data through context, use your own custom key type.
 
 ### 12. `fasthttp`, Not `net/http`
 
-Bifrost uses `github.com/valyala/fasthttp` for provider HTTP calls. The API is different from `net/http`:
+Flare uses `github.com/valyala/fasthttp` for provider HTTP calls. The API is different from `net/http`:
 - Use `fasthttp.AcquireRequest()`/`fasthttp.ReleaseRequest()` for lifecycle
 - `fasthttp.Client` pools connections per-host (`NetworkConfig.MaxConnsPerHost`, default 5000, 30s idle)
 - Request/response bodies accessed via `resp.Body()` (returns `[]byte`, not `io.Reader`)
@@ -490,7 +490,7 @@ For reading or writing a **single field** (or a handful) inside a larger raw JSO
 
 ### 14. Atomic Pointer for Hot Config Reload
 
-`Bifrost` uses `atomic.Pointer` for providers and plugins lists. On updates: create new slice → atomically swap pointer. **Never mutate the slice in place** — concurrent readers would see partial state.
+`Flare` uses `atomic.Pointer` for providers and plugins lists. On updates: create new slice → atomically swap pointer. **Never mutate the slice in place** — concurrent readers would see partial state.
 
 ### 15. MCP Tool Filtering is 4 Levels Deep
 
@@ -596,7 +596,7 @@ make test-core DEBUG=1 PROVIDER=gemini TESTCASE=TestResponsesStream    # attach 
 Scenario-based tests that run against **live provider APIs** with dual-API testing (Chat Completions + Responses API):
 
 ```go
-func RunMyScenarioTest(t *testing.T, client *bifrost.Bifrost, ctx context.Context, cfg ComprehensiveTestConfig) {
+func RunMyScenarioTest(t *testing.T, client *bifrost.Flare, ctx context.Context, cfg ComprehensiveTestConfig) {
     // Use validation presets: BasicChatExpectations(), ToolCallExpectations(), etc.
     // Use retry framework for flaky assertions
 }
@@ -672,7 +672,7 @@ Systematically address unresolved PR review comments. Uses GraphQL to get unreso
 
 ### Add a new field to API responses
 1. Add to schema type in `core/schemas/`
-2. Map in provider response converter (`ToBifrost*Response`)
+2. Map in provider response converter (`ToFlare*Response`)
 3. Handle in streaming accumulator if applicable
 4. Update HTTP handler if field needs special serialization
 5. Update `transports/config.schema.json` if configurable
@@ -681,7 +681,7 @@ Systematically address unresolved PR review comments. Uses GraphQL to get unreso
 1. Create `plugins/<name>/` with its own `go.mod`
 2. Implement `LLMPlugin`, `MCPPlugin`, or `HTTPTransportPlugin` interface
 3. Add to `go.work`
-4. Register in transport layer or Bifrost config
+4. Register in transport layer or Flare config
 5. Add test targets to `Makefile`
 
 ### Modify a UI feature
@@ -697,12 +697,12 @@ Systematically address unresolved PR review comments. Uses GraphQL to get unreso
 
 | What | Where |
 |------|-------|
-| Main Bifrost struct & queuing | `core/bifrost.go` |
+| Main Flare struct & queuing | `core/bifrost.go` |
 | Inference routing & fallbacks | `core/inference.go` |
 | Provider interface (30+ methods) | `core/schemas/provider.go` |
 | ModelProvider enum & context keys | `core/schemas/bifrost.go` |
 | Plugin interfaces & pooled HTTP types | `core/schemas/plugin.go` |
-| BifrostContext (mutable context) | `core/schemas/context.go` |
+| FlareContext (mutable context) | `core/schemas/context.go` |
 | Chat completion types | `core/schemas/chatcompletions.go` |
 | Responses API types | `core/schemas/responses.go` |
 | Object pool (prod + debug) | `core/pool/pool_prod.go`, `pool_debug.go` |
@@ -729,7 +729,7 @@ Systematically address unresolved PR review comments. Uses GraphQL to get unreso
 - **Provider types**: Prefixed with provider name in PascalCase (`AnthropicChatRequest`, `GeminiEmbeddingResponse`).
 - **Converter functions**: Pure — no side effects, no logging, no HTTP.
 - **Pool names**: Descriptive string passed to `pool.New()` (e.g., `"channel-message"`, `"response-stream"`).
-- **Context keys**: Use `BifrostContextKey` type. Custom plugins should define their own key types to avoid collisions.
+- **Context keys**: Use `FlareContextKey` type. Custom plugins should define their own key types to avoid collisions.
 - **Go filenames**: No underscores. The only permitted underscore is the `_test.go` suffix. Examples: `pluginpipeline.go`, `pluginpipeline_test.go` — never `plugin_pipeline.go` or `plugin_pipeline_race_test.go`. Concatenate words (lowercase, no separators) for multi-word filenames.
 
 # Frontend Code Guidelines & Patterns

@@ -92,10 +92,10 @@ func TestReloadVirtualKeyAvoidsGovernanceSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create governance store: %v", err)
 	}
-	baseStore.CreateVirtualKeyInMemory(ctx, &configstoreTables.TableVirtualKey{ID: "vk-id", Name: "old", Value: *schemas.NewSecretVar("sk-bf-old")})
+	baseStore.CreateVirtualKeyInMemory(ctx, &configstoreTables.TableVirtualKey{ID: "vk-id", Name: "old", Value: *schemas.NewSecretVar("sk-fx-old")})
 	store := &reloadVirtualKeyGovernanceStore{GovernanceStore: baseStore}
 	plugin := &reloadVirtualKeyPlugin{store: store}
-	persistedVK := &configstoreTables.TableVirtualKey{ID: "vk-id", Name: "new", Value: *schemas.NewSecretVar("sk-bf-new")}
+	persistedVK := &configstoreTables.TableVirtualKey{ID: "vk-id", Name: "new", Value: *schemas.NewSecretVar("sk-fx-new")}
 	config := &lib.Config{
 		ConfigStore:  &reloadVirtualKeyConfigStore{vk: persistedVK},
 		ClientConfig: &configstore.ClientConfig{},
@@ -115,7 +115,7 @@ func TestReloadVirtualKeyAvoidsGovernanceSnapshot(t *testing.T) {
 		t.Fatalf("GetGovernanceData called %d times, want 0", store.governanceDataCalls)
 	}
 	reloaded, ok := baseStore.GetVirtualKeyByID(ctx, "vk-id")
-	if !ok || reloaded.Value.GetValue() != "sk-bf-new" {
+	if !ok || reloaded.Value.GetValue() != "sk-fx-new" {
 		t.Fatalf("store does not answer with the reloaded key: %+v", reloaded)
 	}
 }

@@ -1,6 +1,6 @@
-# Bifrost on AWS ECS
+# Flare on AWS ECS
 
-Deploys Bifrost as an ECS Fargate service with optional ALB and autoscaling.
+Deploys Flare as an ECS Fargate service with optional ALB and autoscaling.
 
 ## Prerequisites
 

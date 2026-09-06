@@ -779,7 +779,7 @@ func TestSignAWSRequest_ExcludesVolatileHeadersFromSignature(t *testing.T) {
 		"x-forwarded-proto": "https",
 		"x-real-ip":         "10.30.10.147",
 		"x-request-id":      "57bac1b7-1831-4a0a-97cb-af8e87329147",
-		"x-bf-vk":           "sk-bf-secret-should-never-reach-aws",
+		"x-bf-vk":           "sk-fx-secret-should-never-reach-aws",
 		"connection":        "keep-alive",
 	}
 	kept := map[string]string{

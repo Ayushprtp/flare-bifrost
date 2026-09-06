@@ -1,4 +1,4 @@
-# Bifrost Harness Coverage Backlog
+# Flare Harness Coverage Backlog
 
 Per-provider inventory of features sourced from each provider's official docs, cross-referenced
 against the current harness collection (`provider-harness.json`). Each row is a candidate test
@@ -228,7 +228,7 @@ Normalized embeddings remain available through `/v1/embeddings`, `/openai/v1/emb
 
 - [x] **Titan V2 baseline** (`inputText`, one vector out, `inputTextTokenCount` to usage) - folder 53.A1
 - [x] **Titan `dimensions`** (1024 default | 512 | 256) - folder 53.A2
-- [x] **Titan array-input collapse** (no batch shape; Bifrost joins with `" \n"`, returns 1 vector) - folder 53.A3
+- [x] **Titan array-input collapse** (no batch shape; Flare joins with `" \n"`, returns 1 vector) - folder 53.A3
 - [x] **Titan `normalize`** (default true; proven via L2 norm of the returned vector) - folder 53.A4 / 53.A5
 - [x] **Titan `embeddingTypes`** (camelCase; `embeddingsByType` recovered through `x-bf-send-back-raw-response`) - folder 53.A6
 - [x] **Titan native InvokeModel typed envelopes** (`binary` alone and `float` + `binary`) — folder 58.A / 58.B (PR #6335)
@@ -390,9 +390,9 @@ Sources:
 
 ---
 
-## Cross-cutting (Bifrost-specific)
+## Cross-cutting (Flare-specific)
 
-These exercise Bifrost's translation layer between provider shapes — every check below uses the unified
+These exercise Flare's translation layer between provider shapes — every check below uses the unified
 `POST /v1/chat/completions` endpoint with `provider/model` prefix routing.
 
 - [x] OpenAI / Anthropic / Bedrock / Gemini / Vertex Basic Chat (50 cross-model entries)
@@ -403,26 +403,26 @@ These exercise Bifrost's translation layer between provider shapes — every che
 - [~] Web search cross-cut (Anthropic + Bedrock + Vertex Claude (sonnet) + Vertex Gemini (google_search) via Cross-Cut Round 4; **OpenAI Responses-style web_search via /v1/chat still missing**)
 - [~] **Code execution cross-cut** (Anthropic + Gemini + Bedrock + Vertex Claude (opus); **Vertex Gemini code execution via /v1/chat untested**)
 - [~] **Tool choice forced cross-cut** (OpenAI + Bedrock + Vertex Claude via Cross-Cut Round 4; **Anthropic + Gemini + Azure still missing**)
-- [ ] **Computer use via cross-model** (`anthropic/claude-...` with computer_2025x tools - verifies Bifrost's translation; currently only tested via /anthropic drop-in and `vertex/claude-opus-4-7` preview at L1279)
+- [ ] **Computer use via cross-model** (`anthropic/claude-...` with computer_2025x tools - verifies Flare's translation; currently only tested via /anthropic drop-in and `vertex/claude-opus-4-7` preview at L1279)
 - [~] **Extended/adaptive thinking via cross-model** (Anthropic enabled + Bedrock enabled/adaptive + Vertex Claude enabled/adaptive covered; **anthropic-direct adaptive Opus 4.7 still missing**)
 - [x] **OpenAI Responses reasoning item id/encrypted_content round-trip via Anthropic drop-in** (`/anthropic/v1/messages` → openai/gpt-5: turn-1 `redacted_thinking` block replayed on turn 2 without OpenAI's item-id mismatch 400 — pins #5186; folder 38)
 - [~] **Reasoning/thinking multi-turn replay across the criss-cross matrix** (folder 39: OpenAI-shaped request → Anthropic model reverse direction, plus native-chat Anthropic-origin `reasoning_details` replay per #4943 previously uncovered by the harness; Gemini `thoughtSignature` replay (distinct smuggling mechanism from the OpenAI/Anthropic encrypted_content envelope, #5186 — deserves its own replay-matrix folder) and Azure-hosted-reasoning-model coverage still open)
 - [x] **Reasoning-signature replay onto a model that refuses the field** (folder 60: native `/v1/chat/completions` → `bedrock/moonshotai.kimi-k2.5` with a foreign `reasoning_details[].signature`. Bedrock answers "This model doesn't support the reasoningContent.reasoningText.signature field" — a *field-not-accepted* refusal, not the *payload-unverifiable* wording folder 44 pins, so `isEncryptedReasoningRejection` missed it and the 400 reached the client. Also the first Bedrock and first chat-shape coverage of the fail-soft: a different carrier (`reasoning_details[].signature`) and a different strip (`stripChatUnverifiableReasoning`) than folder 44's `encrypted_content`/`stripResponsesEncryptedContent`.)
-- [x] **Bedrock Converse reasoning wire shape per model family** (folder 67: `bedrock/us.openai.gpt-5.6-luna` on `/v1/chat/completions` and `bedrock/us.xai.grok-4.6` on `/v1/responses`, capture+replay pairs. OpenAI and xAI on Converse return `reasoningContent.redactedContent`, an opaque blob, where Anthropic and DeepSeek return `reasoningContent.reasoningText{text,signature}`; Bifrost modelled only the latter, dropped the blob on ingress and re-emitted an empty unsigned `reasoningText` on replay, which Converse answers with an opaque 500 "The system encountered an unexpected error during processing." Only reachable on turn 2. The `us.` prefix is load-bearing — a bare id routes to bedrock-mantle and never reaches Converse, which is why the pre-existing `bedrock/openai.gpt-5.6-sol` rows could not catch this. The reasoningText half stays covered for Anthropic-on-Bedrock by folder 46.)
+- [x] **Bedrock Converse reasoning wire shape per model family** (folder 67: `bedrock/us.openai.gpt-5.6-luna` on `/v1/chat/completions` and `bedrock/us.xai.grok-4.6` on `/v1/responses`, capture+replay pairs. OpenAI and xAI on Converse return `reasoningContent.redactedContent`, an opaque blob, where Anthropic and DeepSeek return `reasoningContent.reasoningText{text,signature}`; Flare modelled only the latter, dropped the blob on ingress and re-emitted an empty unsigned `reasoningText` on replay, which Converse answers with an opaque 500 "The system encountered an unexpected error during processing." Only reachable on turn 2. The `us.` prefix is load-bearing — a bare id routes to bedrock-mantle and never reaches Converse, which is why the pre-existing `bedrock/openai.gpt-5.6-sol` rows could not catch this. The reasoningText half stays covered for Anthropic-on-Bedrock by folder 46.)
 - [ ] **Native `/v1/chat/completions` `reasoning_details` id-loss for OpenAI-origin encrypted reasoning** (same bug *class* as #5186 but a separate code path: `core/schemas/mux.go` `ToChatMessages` never populates `ChatReasoningDetails.ID` on egress, and `ToResponsesMessages` mints a fresh `rs_` id on replay regardless, unaffected by the `/anthropic` surface fix. No tracked issue yet — file one before adding a harness case; a currently-red case with no owner/fix-in-flight breaks this collection's regression-pin convention.)
 - [x] **Prompt caching via cross-model** (Anthropic + Bedrock 1h + Vertex Claude 1h covered)
 - [~] **System message cross-cut** (Vertex Claude added in Round 4; Azure added in Round 4; **other providers were already implicit via cross-cut entries** - if explicit test needed, file a ticket)
 - [~] **Multi-turn conversation cross-cut** (Vertex Claude added in Round 4; remaining providers still cross-cut-implicit only)
 - [x] **Stop sequences cross-cut** (OpenAI + Anthropic + Gemini already; + Bedrock + Vertex Claude + Vertex Gemini added in Cross-Cut Round 4)
-- [~] **Sampling-params normalization** (Bifrost should silently drop temperature for Opus 4.7+; Anthropic-direct + Vertex Claude Opus 4.7 covered; **Bedrock Opus 4.7 via cross-model still missing**)
-- [x] **MCP tool stripping for non-MCP providers** (Bifrost silently drops provider-side `type:"mcp"` server tools from a Responses request for Bedrock + Vertex instead of erroring; function tools — how local/configured MCP servers surface — survive — regression #3795. Folder "11. Cross-Provider Feature Tests / MCP Tool Handling cross-cut": 16-item matrix over {opus, sonnet} × {lone-mcp, mcp+function, multi-tool #3795 shape} plus /openai drop-in and streaming axes)
+- [~] **Sampling-params normalization** (Flare should silently drop temperature for Opus 4.7+; Anthropic-direct + Vertex Claude Opus 4.7 covered; **Bedrock Opus 4.7 via cross-model still missing**)
+- [x] **MCP tool stripping for non-MCP providers** (Flare silently drops provider-side `type:"mcp"` server tools from a Responses request for Bedrock + Vertex instead of erroring; function tools — how local/configured MCP servers surface — survive — regression #3795. Folder "11. Cross-Provider Feature Tests / MCP Tool Handling cross-cut": 16-item matrix over {opus, sonnet} × {lone-mcp, mcp+function, multi-tool #3795 shape} plus /openai drop-in and streaming axes)
 - [ ] **Failover scenarios** (request to provider X falls back to provider Y on 5xx)
-- [x] **Virtual keys / governance** (`X-Bifrost-VK` header with allowed_models) - covered by `bifrost-v1-vk-quota` (quota endpoint contract), `bifrost-v1-rate-limit` (429 request/token limits, 402 budget), and `bifrost-v1-vk-rotation-cooldown` (rotation grace windows at 1m/3m); allowed_models enforcement in `bifrost-v1-vk-expiry` and `bifrost-routing-wiring`
-- [ ] **Rate limit propagation** (provider 429 → Bifrost 429 with Retry-After preserved)
+- [x] **Virtual keys / governance** (`X-Flare-VK` header with allowed_models) - covered by `bifrost-v1-vk-quota` (quota endpoint contract), `bifrost-v1-rate-limit` (429 request/token limits, 402 budget), and `bifrost-v1-vk-rotation-cooldown` (rotation grace windows at 1m/3m); allowed_models enforcement in `bifrost-v1-vk-expiry` and `bifrost-routing-wiring`
+- [ ] **Rate limit propagation** (provider 429 → Flare 429 with Retry-After preserved)
 
 ---
 
-## Passthrough surface (Bifrost catch-all forwarding)
+## Passthrough surface (Flare catch-all forwarding)
 
 Currently only Basic Chat is exercised through any `*_passthrough/*` route. Every advanced feature
 should be re-tested through passthrough since the translation layer is bypassed.
@@ -450,7 +450,7 @@ should be re-tested through passthrough since the translation layer is bypassed.
 ## Priority order for backlog burn-down
 
 1. **Cross-model feature variants** — biggest gap, highest leverage; ~20 new requests close most of the matrix
-2. **Anthropic beta headers + new-gen tools** — lots of low-hanging features Bifrost claims to support
+2. **Anthropic beta headers + new-gen tools** — lots of low-hanging features Flare claims to support
 3. **Bedrock streaming + Bedrock vision** — Converse API has both but harness has neither
 4. **Passthrough advanced features** — proves the byte-for-byte forwarding handles complex bodies
 5. **Azure beyond Basic Chat** — Azure has the worst coverage; even one tools/streaming test would help

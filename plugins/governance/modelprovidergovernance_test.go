@@ -1520,7 +1520,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyBudgetExceeded(t *testing.T) {
 	// Model/provider checks pass (no limits)
 	// Virtual key budget exceeded
 	vkBudget := buildBudgetWithUsage("vk-budget1", 100.0, 100.1, "1h") // Over limit
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", vkBudget)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		Budgets:     []configstoreTables.TableBudget{*vkBudget},
@@ -1530,7 +1530,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyBudgetExceeded(t *testing.T) {
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1551,7 +1551,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyRateLimitExceeded_Token(t *testi
 	// Model/provider checks pass (no limits)
 	// Virtual key rate limit exceeded (token)
 	vkRateLimit := buildRateLimitWithUsage("vk-rl1", 10000, 10000, 1000, 0) // Tokens at max
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", vkRateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", vkRateLimit)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		RateLimits:  []configstoreTables.TableRateLimit{*vkRateLimit},
@@ -1561,7 +1561,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyRateLimitExceeded_Token(t *testi
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1582,7 +1582,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyRateLimitExceeded_Request(t *tes
 	// Model/provider checks pass (no limits)
 	// Virtual key rate limit exceeded (request)
 	vkRateLimit := buildRateLimitWithUsage("vk-rl1", 10000, 0, 1000, 1000) // Requests at max
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", vkRateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", vkRateLimit)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		RateLimits:  []configstoreTables.TableRateLimit{*vkRateLimit},
@@ -1592,7 +1592,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyRateLimitExceeded_Request(t *tes
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1612,7 +1612,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyChecksPass(t *testing.T) {
 	logger := NewMockLogger()
 	// Model/provider checks pass (no limits)
 	// Virtual key checks also pass
-	vk := buildVirtualKey("vk1", "sk-bf-test", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-test", "Test VK", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 	}
@@ -1624,7 +1624,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyChecksPass(t *testing.T) {
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1648,7 +1648,7 @@ func TestPreLLMHook_SkipKeySelection(t *testing.T) {
 	logger := NewMockLogger()
 	// Valid VK whose budget is already exceeded, so enforcement is observable when it runs.
 	vkBudget := buildBudgetWithUsage("vk-budget1", 100.0, 100.1, "1h")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", vkBudget)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		Budgets:     []configstoreTables.TableBudget{*vkBudget},
@@ -1665,9 +1665,9 @@ func TestPreLLMHook_SkipKeySelection(t *testing.T) {
 	}{
 		{name: "skip + no VK rejected when VK mandatory", skipKeySelection: true, virtualKey: "", isVkMandatory: true, expectShortCircuit: true, msgContains: "virtual key is required"},
 		{name: "skip + no VK allowed when VK not mandatory", skipKeySelection: true, virtualKey: "", isVkMandatory: false, expectShortCircuit: false},
-		{name: "skip + valid VK is enforced (budget exceeded)", skipKeySelection: true, virtualKey: "sk-bf-test", isVkMandatory: false, expectShortCircuit: true, msgContains: "budget exceeded"},
-		{name: "skip + unknown VK is rejected", skipKeySelection: true, virtualKey: "sk-bf-unknown", isVkMandatory: false, expectShortCircuit: true, msgContains: "not found"},
-		{name: "no skip + valid VK enforced identically", skipKeySelection: false, virtualKey: "sk-bf-test", isVkMandatory: false, expectShortCircuit: true, msgContains: "budget exceeded"},
+		{name: "skip + valid VK is enforced (budget exceeded)", skipKeySelection: true, virtualKey: "sk-fx-test", isVkMandatory: false, expectShortCircuit: true, msgContains: "budget exceeded"},
+		{name: "skip + unknown VK is rejected", skipKeySelection: true, virtualKey: "sk-fx-unknown", isVkMandatory: false, expectShortCircuit: true, msgContains: "not found"},
+		{name: "no skip + valid VK enforced identically", skipKeySelection: false, virtualKey: "sk-fx-test", isVkMandatory: false, expectShortCircuit: true, msgContains: "budget exceeded"},
 	}
 
 	for _, tc := range tests {
@@ -1767,7 +1767,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyNotFound(t *testing.T) {
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-nonexistent")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-nonexistent")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1787,7 +1787,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyBlocked(t *testing.T) {
 	logger := NewMockLogger()
 	// Model/provider checks pass (no limits)
 	// Virtual key is inactive
-	vk := buildVirtualKey("vk1", "sk-bf-test", "Test VK", false) // Inactive
+	vk := buildVirtualKey("vk1", "sk-fx-test", "Test VK", false) // Inactive
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -1796,7 +1796,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyBlocked(t *testing.T) {
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1819,7 +1819,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyProviderBlocked(t *testing.T) {
 	providerConfigs := []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("anthropic", []string{"claude-3-sonnet"}), // Only Anthropic allowed
 	}
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-test", "Test VK", providerConfigs)
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-test", "Test VK", providerConfigs)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -1828,7 +1828,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyProviderBlocked(t *testing.T) {
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1851,7 +1851,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyModelBlocked(t *testing.T) {
 	providerConfigs := []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"gpt-4", "gpt-4-turbo"}), // Only these models allowed
 	}
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-test", "Test VK", providerConfigs)
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-test", "Test VK", providerConfigs)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -1860,7 +1860,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyModelBlocked(t *testing.T) {
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -1885,7 +1885,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyBudgetExceeded_WithModelPermitPr
 	modelConfig := buildModelConfig("mc1", "gpt-4", nil, modelBudget, nil)
 	// Virtual key budget exceeded
 	vkBudget := buildBudgetWithUsage("vk-budget1", 100.0, 100.1, "1h") // Over limit
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", vkBudget)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		Providers:    []configstoreTables.TableProvider{*provider},
 		ModelConfigs: []configstoreTables.TableModelConfig{*modelConfig},
@@ -1897,7 +1897,7 @@ func TestPreLLMHook_ModelProviderPass_VirtualKeyBudgetExceeded_WithModelPermitPr
 	plugin, err := InitFromStore(context.Background(), &Config{IsVkMandatory: boolPtr(false)}, logger, store, nil, nil, nil, nil)
 	require.NoError(t, err)
 
-	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	parentCtx := context.WithValue(context.Background(), schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	parentCtx = context.WithValue(parentCtx, schemas.BifrostContextKeyRequestID, "req-1")
 	ctx := grantedCtx(parentCtx)
 	req := &schemas.BifrostRequest{
@@ -2058,7 +2058,7 @@ func TestPostHook_UpdatesProviderRateLimitUsage_NoVirtualKey(t *testing.T) {
 func TestPostHook_TracksVirtualKeyUsageWhenUserIDPresent(t *testing.T) {
 	logger := NewMockLogger()
 	rateLimit := buildRateLimitWithUsage("vk-rl", 10000, 0, 1000, 0)
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		RateLimits:  []configstoreTables.TableRateLimit{*rateLimit},
@@ -2069,7 +2069,7 @@ func TestPostHook_TracksVirtualKeyUsageWhenUserIDPresent(t *testing.T) {
 	require.NoError(t, err)
 	defer plugin.Cleanup()
 
-	ctx := resolverCtx(store, "sk-bf-test")
+	ctx := resolverCtx(store, "sk-fx-test")
 	ctx.SetValue(schemas.BifrostContextKeyUserID, "user1")
 
 	// The funnel settles what this request answers to before anything is billed against it, so the
@@ -2112,7 +2112,7 @@ func TestPostHook_TracksVirtualKeyUsageWhenUserIDPresent(t *testing.T) {
 func TestPostHook_SkipVirtualKeyUsageTrackingFlag(t *testing.T) {
 	logger := NewMockLogger()
 	rateLimit := buildRateLimitWithUsage("vk-rl", 10000, 0, 1000, 0)
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		RateLimits:  []configstoreTables.TableRateLimit{*rateLimit},
@@ -2123,7 +2123,7 @@ func TestPostHook_SkipVirtualKeyUsageTrackingFlag(t *testing.T) {
 	require.NoError(t, err)
 	defer plugin.Cleanup()
 
-	ctx := resolverCtx(store, "sk-bf-test")
+	ctx := resolverCtx(store, "sk-fx-test")
 	ctx.SetValue(schemas.BifrostContextKeyUserID, "user1")
 	ctx.SetValue(schemas.BifrostContextKeySkipVirtualKeyUsageTracking, true)
 
@@ -2170,7 +2170,7 @@ func TestPostHook_SkipVirtualKeyUsageTrackingFlag(t *testing.T) {
 func TestPostMCPHook_TracksVirtualKeyUsageWhenUserIDPresent(t *testing.T) {
 	logger := NewMockLogger()
 	rateLimit := buildRateLimitWithUsage("vk-rl", 10000, 0, 1000, 0)
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		RateLimits:  []configstoreTables.TableRateLimit{*rateLimit},
@@ -2181,7 +2181,7 @@ func TestPostMCPHook_TracksVirtualKeyUsageWhenUserIDPresent(t *testing.T) {
 	require.NoError(t, err)
 	defer plugin.Cleanup()
 
-	ctx := resolverCtx(store, "sk-bf-test")
+	ctx := resolverCtx(store, "sk-fx-test")
 	ctx.SetValue(schemas.BifrostContextKeyUserID, "user1")
 	// Evaluating the tool call settles the limits it answers to, and billing reads them from there.
 	// Tool execution names no provider and no model, so what it answers to is whatever funds the
@@ -2212,7 +2212,7 @@ func TestPostMCPHook_TracksVirtualKeyUsageWhenUserIDPresent(t *testing.T) {
 func TestPostMCPHook_SkipVirtualKeyUsageTrackingFlag(t *testing.T) {
 	logger := NewMockLogger()
 	rateLimit := buildRateLimitWithUsage("vk-rl", 10000, 0, 1000, 0)
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 		RateLimits:  []configstoreTables.TableRateLimit{*rateLimit},
@@ -2223,7 +2223,7 @@ func TestPostMCPHook_SkipVirtualKeyUsageTrackingFlag(t *testing.T) {
 	require.NoError(t, err)
 	defer plugin.Cleanup()
 
-	ctx := resolverCtx(store, "sk-bf-test")
+	ctx := resolverCtx(store, "sk-fx-test")
 	ctx.SetValue(schemas.BifrostContextKeyUserID, "user1")
 	ctx.SetValue(schemas.BifrostContextKeySkipVirtualKeyUsageTracking, true)
 	settled, settleErr := resolveLimits(ctx, store, "", "")

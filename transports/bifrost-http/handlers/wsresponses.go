@@ -788,22 +788,22 @@ func createBifrostContextFromAuth(handlerStore lib.HandlerStore, auth *authHeade
 		ctx.SetValue(schemas.BifrostContextKeyVirtualKey, auth.virtualKey)
 	}
 
-	// Handle Bearer token with sk-bf- prefix (virtual key via Authorization header)
+	// Handle Bearer token with sk-fx- prefix (virtual key via Authorization header)
 	if auth.authorization != "" {
 		if strings.HasPrefix(auth.authorization, "Bearer ") {
 			token := strings.TrimPrefix(auth.authorization, "Bearer ")
-			if strings.HasPrefix(token, "sk-bf-") {
+			if strings.HasPrefix(token, "sk-fx-") {
 				ctx.SetValue(schemas.BifrostContextKeyVirtualKey, token)
 			}
 		}
 	}
 	if auth.apiKey != "" {
-		if strings.HasPrefix(auth.apiKey, "sk-bf-") {
+		if strings.HasPrefix(auth.apiKey, "sk-fx-") {
 			ctx.SetValue(schemas.BifrostContextKeyVirtualKey, auth.apiKey)
 		}
 	}
 	if auth.googAPIKey != "" {
-		if strings.HasPrefix(auth.googAPIKey, "sk-bf-") {
+		if strings.HasPrefix(auth.googAPIKey, "sk-fx-") {
 			ctx.SetValue(schemas.BifrostContextKeyVirtualKey, auth.googAPIKey)
 		}
 	}

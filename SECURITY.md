@@ -2,7 +2,7 @@
 
   ## Reporting a Vulnerability
 
-  The Bifrost team takes security issues seriously. We appreciate your efforts to responsibly
+  The Flare team takes security issues seriously. We appreciate your efforts to responsibly
    disclose any vulnerabilities you find.
 
   **Please do NOT report security vulnerabilities through public GitHub issues.**
@@ -51,16 +51,16 @@
 
   ## Security Considerations
 
-  Bifrost is an AI gateway that routes requests to multiple LLM providers. When deploying
-  Bifrost, keep the following in mind:
+  Flare is an AI gateway that routes requests to multiple LLM providers. When deploying
+  Flare, keep the following in mind:
 
-  - **API Key Management**: Bifrost handles provider API keys. Ensure keys are stored
+  - **API Key Management**: Flare handles provider API keys. Ensure keys are stored
   securely and never committed to version control. Use environment variables or a secrets
   manager.
-  - **Network Exposure**: Restrict access to the Bifrost admin interface and API endpoints
+  - **Network Exposure**: Restrict access to the Flare admin interface and API endpoints
   using firewalls, VPNs, or authentication layers appropriate for your environment.
-  - **TLS**: Always use TLS when exposing Bifrost to external networks.
-  - **Access Profiles**: Use Bifrost's access profile and virtual key features to enforce
+  - **TLS**: Always use TLS when exposing Flare to external networks.
+  - **Access Profiles**: Use Flare's access profile and virtual key features to enforce
   least-privilege access to upstream providers.
   - **Plugin Security**: Only use plugins from trusted sources. Plugins execute within the
   request pipeline and have access to request/response data.
@@ -82,10 +82,10 @@
 
   The following are **in scope** for security reports:
 
-  - The Bifrost gateway (core, transports, framework, CLI)
-  - Official Bifrost plugins (`plugins/` directory)
-  - The Bifrost Docker image (`maximhq/bifrost`)
-  - The Bifrost web UI
+  - The Flare gateway (core, transports, framework, CLI)
+  - Official Flare plugins (`plugins/` directory)
+  - The Flare Docker image (`maximhq/bifrost`)
+  - The Flare web UI
 
   The following are **out of scope**:
 

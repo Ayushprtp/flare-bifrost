@@ -1356,7 +1356,7 @@ func TestListModelDetails_AppliesProviderScopedOverride(t *testing.T) {
 // TestParseVKValueFromRequest verifies that the VK value is extracted from each
 // supported header, in priority order, and that non-VK values are ignored.
 func TestParseVKValueFromRequest(t *testing.T) {
-	const vk = "sk-bf-test-virtual-key"
+	const vk = "sk-fx-test-virtual-key"
 
 	cases := []struct {
 		name   string
@@ -1407,7 +1407,7 @@ func TestParseVKValueFromRequest(t *testing.T) {
 			name: "x-bf-vk takes priority over Authorization",
 			setup: func(ctx *fasthttp.RequestCtx) {
 				ctx.Request.Header.Set("x-bf-vk", vk)
-				ctx.Request.Header.Set("Authorization", "Bearer sk-bf-other")
+				ctx.Request.Header.Set("Authorization", "Bearer sk-fx-other")
 			},
 			wantVK: vk,
 		},
@@ -1746,7 +1746,7 @@ func TestParseModelListQuery_VKAppliesResolvedAccess(t *testing.T) {
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.Header.SetMethod("GET")
 	ctx.Request.SetRequestURI("/api/models")
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-test-virtual-key")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-test-virtual-key")
 
 	query, ok := h.parseModelListQuery(ctx, requestContextForTest(ctx), 5)
 	if !ok {
@@ -1775,7 +1775,7 @@ func TestParseModelListQuery_LeavesListingUnfilteredWhenNothingResolved(t *testi
 		vkValue string
 	}{
 		{name: "no key presented"},
-		{name: "key resolves to nothing", vkValue: "sk-bf-test-virtual-key"},
+		{name: "key resolves to nothing", vkValue: "sk-fx-test-virtual-key"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			manager := &mockModelsManager{}

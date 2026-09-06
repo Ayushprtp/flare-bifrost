@@ -1,12 +1,12 @@
 # Local pricing & model parameters files (air-gapped / behind a proxy)
 
-This config makes Bifrost load its pricing datasheet and model parameters
+This config makes Flare load its pricing datasheet and model parameters
 datasheet from local files instead of fetching them from `getbifrost.ai`. Use
 it when the host has no outbound internet access, or when an HTTP proxy blocks
 DNS resolution of `getbifrost.ai` (see issue #4305).
 
 Both `pricing_url` and `model_parameters_url` use the `file://` scheme. When the
-scheme is `file`, Bifrost reads the path directly off disk and never performs
+scheme is `file`, Flare reads the path directly off disk and never performs
 external URL validation or hostname resolution.
 
 The paths are **relative** (`file://../../examples/configs/withlocalpricingfiles/pricing.json`),
@@ -18,7 +18,7 @@ path. Absolute `file:///abs/path.json` URLs also work.
 
 ## Files
 
-- `config.json` - the Bifrost config, pointing both URLs at the sibling `*.json` files.
+- `config.json` - the Flare config, pointing both URLs at the sibling `*.json` files.
 - `pricing.json` - a small sample pricing datasheet (real entries).
 - `model-parameters.json` - a small sample model parameters datasheet (real entries).
 

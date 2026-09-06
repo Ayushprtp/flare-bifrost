@@ -1,12 +1,12 @@
 ---
 name: helm-update
-description: Apply helm chart updates for Bifrost. Detects config.schema.json changes since the last helm release, applies user-requested changes, updates values.yaml / values.schema.json / _helpers.tpl, bumps Chart.yaml version, updates helm README (Latest Version + Upcoming section), creates a docs MDX changelog, and updates docs.json navigation. Ends with a diff review to verify every helm field maps back to a config.schema.json counterpart. Invoked with /helm-update.
+description: Apply helm chart updates for Flare. Detects config.schema.json changes since the last helm release, applies user-requested changes, updates values.yaml / values.schema.json / _helpers.tpl, bumps Chart.yaml version, updates helm README (Latest Version + Upcoming section), creates a docs MDX changelog, and updates docs.json navigation. Ends with a diff review to verify every helm field maps back to a config.schema.json counterpart. Invoked with /helm-update.
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, AskUserQuestion
 ---
 
 # Helm Update
 
-Apply changes to the Bifrost Helm chart, keep it in sync with `config.schema.json`, and update all changelogs.
+Apply changes to the Flare Helm chart, keep it in sync with `config.schema.json`, and update all changelogs.
 
 ## Key File Paths
 
@@ -145,7 +145,7 @@ title: "v<NEW_VERSION>"
 description: "Helm v<NEW_VERSION> changelog - <YYYY-MM-DD>"
 ---
 
-<Update label="Bifrost Helm" description="v<NEW_VERSION>">
+<Update label="Flare Helm" description="v<NEW_VERSION>">
 
 ## Changelog
 

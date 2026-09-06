@@ -1,6 +1,6 @@
-# Bifrost E2E Tests
+# Flare E2E Tests
 
-End-to-end tests for the Bifrost UI using Playwright.
+End-to-end tests for the Flare UI using Playwright.
 
 ## Setup
 

@@ -239,7 +239,7 @@ func TestVirtualKeyBudgetOverrideLifecycle(t *testing.T) {
 	vk := &configstoreTables.TableVirtualKey{
 		ID:       "vk-budget-override",
 		Name:     "override-test",
-		Value:    *schemas.NewSecretVar("sk-bf-override-test"),
+		Value:    *schemas.NewSecretVar("sk-fx-override-test"),
 		IsActive: &active,
 	}
 	if err := store.CreateVirtualKey(ctx, vk); err != nil {
@@ -317,7 +317,7 @@ func TestVirtualKeyBudgetOverrideRejectsDirectMirrorBudget(t *testing.T) {
 	vk := &configstoreTables.TableVirtualKey{
 		ID:       "vk-ap-managed",
 		Name:     "ap-managed",
-		Value:    *schemas.NewSecretVar("sk-bf-ap-managed"),
+		Value:    *schemas.NewSecretVar("sk-fx-ap-managed"),
 		IsActive: &active,
 	}
 	if err := store.CreateVirtualKey(ctx, vk); err != nil {
@@ -1106,7 +1106,7 @@ func TestRotateVirtualKey_OnlyChangesValueAndReloads(t *testing.T) {
 			"vk-1": {
 				ID:          "vk-1",
 				Name:        "Production",
-				Value:       *schemas.NewSecretVar("sk-bf-old"),
+				Value:       *schemas.NewSecretVar("sk-fx-old"),
 				Description: "existing description",
 				TeamID:      &teamID,
 				RateLimitID: &rateLimitID,
@@ -1142,7 +1142,7 @@ func TestRotateVirtualKey_OnlyChangesValueAndReloads(t *testing.T) {
 	}
 
 	updated := store.virtualKeys["vk-1"]
-	if updated.Value.GetValue() == "sk-bf-old" {
+	if updated.Value.GetValue() == "sk-fx-old" {
 		t.Fatal("expected virtual key value to rotate")
 	}
 	if !strings.HasPrefix(updated.Value.GetValue(), governance.VirtualKeyPrefix) {
@@ -1184,7 +1184,7 @@ func TestRotateVirtualKey_CooldownStoresPreviousValue(t *testing.T) {
 			"vk-1": {
 				ID:    "vk-1",
 				Name:  "Production",
-				Value: *schemas.NewSecretVar("sk-bf-old"),
+				Value: *schemas.NewSecretVar("sk-fx-old"),
 			},
 		},
 		clientConfig: &configstore.ClientConfig{
@@ -1204,10 +1204,10 @@ func TestRotateVirtualKey_CooldownStoresPreviousValue(t *testing.T) {
 		t.Fatalf("expected status 200, got %d: %s", ctx.Response.StatusCode(), string(ctx.Response.Body()))
 	}
 	updated := store.virtualKeys["vk-1"]
-	if updated.Value.GetValue() == "sk-bf-old" {
+	if updated.Value.GetValue() == "sk-fx-old" {
 		t.Fatal("expected virtual key value to rotate")
 	}
-	if updated.PreviousValue.GetValue() != "sk-bf-old" {
+	if updated.PreviousValue.GetValue() != "sk-fx-old" {
 		t.Fatalf("expected previous value to hold the retired value, got %q", updated.PreviousValue.GetValue())
 	}
 	if updated.RotatedAt == nil {
@@ -1232,10 +1232,10 @@ func TestRotateVirtualKey_ZeroCooldownClearsPreviousValue(t *testing.T) {
 			"vk-1": {
 				ID:    "vk-1",
 				Name:  "Production",
-				Value: *schemas.NewSecretVar("sk-bf-old"),
+				Value: *schemas.NewSecretVar("sk-fx-old"),
 				// In-flight grace state from an earlier rotation performed while
 				// a cooldown was configured.
-				PreviousValue:          *schemas.NewSecretVar("sk-bf-older"),
+				PreviousValue:          *schemas.NewSecretVar("sk-fx-older"),
 				PreviousValueExpiresAt: &stale,
 				RotatedAt:              &rotatedEarlier,
 			},
@@ -1281,7 +1281,7 @@ func rotateWithDefaultCooldownStore(store *mockRotateConfigStore, t *testing.T) 
 		t.Fatalf("expected status 200, got %d: %s", ctx.Response.StatusCode(), string(ctx.Response.Body()))
 	}
 	updated := store.virtualKeys["vk-1"]
-	if updated.Value.GetValue() == "sk-bf-old" {
+	if updated.Value.GetValue() == "sk-fx-old" {
 		t.Fatal("expected virtual key value to rotate")
 	}
 	if updated.PreviousValue.IsSet() {
@@ -1303,8 +1303,8 @@ func staleGraceVirtualKeys() map[string]*configstoreTables.TableVirtualKey {
 		"vk-1": {
 			ID:                     "vk-1",
 			Name:                   "Production",
-			Value:                  *schemas.NewSecretVar("sk-bf-old"),
-			PreviousValue:          *schemas.NewSecretVar("sk-bf-older"),
+			Value:                  *schemas.NewSecretVar("sk-fx-old"),
+			PreviousValue:          *schemas.NewSecretVar("sk-fx-older"),
 			PreviousValueHash:      "stale-hash",
 			PreviousValueExpiresAt: &stale,
 			RotatedAt:              &rotatedEarlier,
@@ -1405,7 +1405,7 @@ func TestRotateVirtualKey_UpdateFailureDoesNotReload(t *testing.T) {
 
 	store := &mockRotateConfigStore{
 		virtualKeys: map[string]*configstoreTables.TableVirtualKey{
-			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-bf-old")},
+			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-fx-old")},
 		},
 		updateErr: errors.New("database unavailable"),
 	}
@@ -1420,7 +1420,7 @@ func TestRotateVirtualKey_UpdateFailureDoesNotReload(t *testing.T) {
 	if ctx.Response.StatusCode() != 500 {
 		t.Fatalf("expected status 500, got %d: %s", ctx.Response.StatusCode(), string(ctx.Response.Body()))
 	}
-	if store.virtualKeys["vk-1"].Value.GetValue() != "sk-bf-old" {
+	if store.virtualKeys["vk-1"].Value.GetValue() != "sk-fx-old" {
 		t.Fatalf("expected value to remain unchanged, got %q", store.virtualKeys["vk-1"].Value.GetValue())
 	}
 	if len(manager.reloadIDs) != 0 {
@@ -1433,7 +1433,7 @@ func TestRotateVirtualKey_ReloadFailureReturnsErrorAfterUpdate(t *testing.T) {
 
 	store := &mockRotateConfigStore{
 		virtualKeys: map[string]*configstoreTables.TableVirtualKey{
-			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-bf-old")},
+			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-fx-old")},
 		},
 	}
 	manager := &mockRotateGovernanceManager{store: store, reloadErr: errors.New("reload failed")}
@@ -1450,7 +1450,7 @@ func TestRotateVirtualKey_ReloadFailureReturnsErrorAfterUpdate(t *testing.T) {
 	if store.updates != 1 {
 		t.Fatalf("expected one update, got %d", store.updates)
 	}
-	if store.virtualKeys["vk-1"].Value.GetValue() == "sk-bf-old" {
+	if store.virtualKeys["vk-1"].Value.GetValue() == "sk-fx-old" {
 		t.Fatal("expected value to rotate before reload failure")
 	}
 	if len(manager.reloadIDs) != 1 || manager.reloadIDs[0] != "vk-1" {
@@ -1466,8 +1466,8 @@ func TestRotateVirtualKeys_PartialSuccess(t *testing.T) {
 
 	store := &mockRotateConfigStore{
 		virtualKeys: map[string]*configstoreTables.TableVirtualKey{
-			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-bf-old-1")},
-			"vk-2": {ID: "vk-2", Name: "Two", Value: *schemas.NewSecretVar("sk-bf-old-2")},
+			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-fx-old-1")},
+			"vk-2": {ID: "vk-2", Name: "Two", Value: *schemas.NewSecretVar("sk-fx-old-2")},
 		},
 	}
 	manager := &mockRotateGovernanceManager{store: store}
@@ -1487,7 +1487,7 @@ func TestRotateVirtualKeys_PartialSuccess(t *testing.T) {
 	if len(manager.reloadIDs) != 2 || manager.reloadIDs[0] != "vk-1" || manager.reloadIDs[1] != "vk-2" {
 		t.Fatalf("expected reloads for vk-1 and vk-2, got %#v", manager.reloadIDs)
 	}
-	if store.virtualKeys["vk-1"].Value.GetValue() == "sk-bf-old-1" || store.virtualKeys["vk-2"].Value.GetValue() == "sk-bf-old-2" {
+	if store.virtualKeys["vk-1"].Value.GetValue() == "sk-fx-old-1" || store.virtualKeys["vk-2"].Value.GetValue() == "sk-fx-old-2" {
 		t.Fatalf("expected successful IDs to rotate: %#v", store.virtualKeys)
 	}
 
@@ -1523,7 +1523,7 @@ func TestRotateVirtualKeys_RejectsInvalidRequests(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			store := &mockRotateConfigStore{
 				virtualKeys: map[string]*configstoreTables.TableVirtualKey{
-					"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-bf-old-1")},
+					"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-fx-old-1")},
 				},
 			}
 			manager := &mockRotateGovernanceManager{store: store}
@@ -1555,8 +1555,8 @@ func TestRotateVirtualKeys_TrimsAndDeduplicatesIDs(t *testing.T) {
 
 	store := &mockRotateConfigStore{
 		virtualKeys: map[string]*configstoreTables.TableVirtualKey{
-			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-bf-old-1")},
-			"vk-2": {ID: "vk-2", Name: "Two", Value: *schemas.NewSecretVar("sk-bf-old-2")},
+			"vk-1": {ID: "vk-1", Name: "One", Value: *schemas.NewSecretVar("sk-fx-old-1")},
+			"vk-2": {ID: "vk-2", Name: "Two", Value: *schemas.NewSecretVar("sk-fx-old-2")},
 		},
 	}
 	manager := &mockRotateGovernanceManager{store: store}
@@ -1759,7 +1759,7 @@ func TestGetVirtualKeyQuota_HydratesBudgetsFromModelConfigs(t *testing.T) {
 	h := &GovernanceHandler{configStore: store, logManager: logMgr}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -1896,7 +1896,7 @@ func TestGetVirtualKeyQuota_ExternalResolverReplacesWithAccessProfileBudgets(t *
 	}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -1978,7 +1978,7 @@ func TestGetVirtualKeyQuota_ExternalResolverRateLimitOnly(t *testing.T) {
 	}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -2085,7 +2085,7 @@ func TestGetVirtualKeyQuota_ExternalResolverErrorFailsClosed(t *testing.T) {
 	}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -2115,7 +2115,7 @@ func TestGetVirtualKeyQuota_NoGovernanceReturnsEmpty(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -2176,7 +2176,7 @@ func TestGetVirtualKeyQuota_NotFoundReturns401(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-unknown")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-unknown")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -2203,7 +2203,7 @@ func TestGetVirtualKeyQuota_ModelConfigLoadErrorFailsClosed(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -2241,7 +2241,7 @@ func TestGetVirtualKeyQuota_RankingsErrorFailsClosed(t *testing.T) {
 	h := &GovernanceHandler{configStore: store, logManager: logMgr}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-secret")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-secret")
 
 	h.getVirtualKeyQuota(ctx)
 
@@ -2277,7 +2277,7 @@ func TestGetVirtualKeyQuota_EndToEndWithRealStore(t *testing.T) {
 	vk := &configstoreTables.TableVirtualKey{
 		ID:       vkID,
 		Name:     "Prod",
-		Value:    *schemas.NewSecretVar("sk-bf-e2e-secret"),
+		Value:    *schemas.NewSecretVar("sk-fx-e2e-secret"),
 		IsActive: &active,
 		ProviderConfigs: []configstoreTables.TableVirtualKeyProviderConfig{
 			{VirtualKeyID: vkID, Provider: "openai", AllowAllKeys: true, AllowedModels: schemas.WhiteList{"*"}},
@@ -2347,7 +2347,7 @@ func TestGetVirtualKeyQuota_EndToEndWithRealStore(t *testing.T) {
 	// The real store query uses the RequestCtx as a context.Context (Done/Err), which
 	// nil-derefs on a non-Init'd RequestCtx — so initialize it like a live request.
 	var req fasthttp.Request
-	req.Header.Set("x-bf-vk", "sk-bf-e2e-secret")
+	req.Header.Set("x-bf-vk", "sk-fx-e2e-secret")
 	reqCtx := &fasthttp.RequestCtx{}
 	reqCtx.Init(&req, &net.TCPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 12345}, nil)
 	h.getVirtualKeyQuota(reqCtx)
@@ -2418,7 +2418,7 @@ func TestGetVirtualKeyQuota_EndToEndWithRealStore(t *testing.T) {
 }
 
 // newQuotaGraceTestStore creates a real SQLite-backed store holding one VK whose
-// value was rotated from sk-bf-grace-old to sk-bf-grace-new with the given
+// value was rotated from sk-fx-grace-old to sk-fx-grace-new with the given
 // grace-window expiry.
 func newQuotaGraceTestStore(t *testing.T, expiresAt time.Time) configstore.ConfigStore {
 	t.Helper()
@@ -2436,7 +2436,7 @@ func newQuotaGraceTestStore(t *testing.T, expiresAt time.Time) configstore.Confi
 	vk := &configstoreTables.TableVirtualKey{
 		ID:       "vk-grace",
 		Name:     "GraceProd",
-		Value:    *schemas.NewSecretVar("sk-bf-grace-old"),
+		Value:    *schemas.NewSecretVar("sk-fx-grace-old"),
 		IsActive: &active,
 	}
 	if err := store.CreateVirtualKey(ctx, vk); err != nil {
@@ -2444,8 +2444,8 @@ func newQuotaGraceTestStore(t *testing.T, expiresAt time.Time) configstore.Confi
 	}
 
 	now := time.Now().UTC()
-	vk.Value = *schemas.NewSecretVar("sk-bf-grace-new")
-	vk.PreviousValue = *schemas.NewSecretVar("sk-bf-grace-old")
+	vk.Value = *schemas.NewSecretVar("sk-fx-grace-new")
+	vk.PreviousValue = *schemas.NewSecretVar("sk-fx-grace-old")
 	vk.PreviousValueExpiresAt = &expiresAt
 	vk.RotatedAt = &now
 	if err := store.UpdateVirtualKey(ctx, vk); err != nil {
@@ -2463,7 +2463,7 @@ func TestGetVirtualKeyQuota_GraceValueWithRealStore(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	var req fasthttp.Request
-	req.Header.Set("x-bf-vk", "sk-bf-grace-old")
+	req.Header.Set("x-bf-vk", "sk-fx-grace-old")
 	reqCtx := &fasthttp.RequestCtx{}
 	reqCtx.Init(&req, &net.TCPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 12345}, nil)
 	h.getVirtualKeyQuota(reqCtx)
@@ -2488,7 +2488,7 @@ func TestGetVirtualKeyQuota_ExpiredGraceValueUnauthorized(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	var req fasthttp.Request
-	req.Header.Set("x-bf-vk", "sk-bf-grace-old")
+	req.Header.Set("x-bf-vk", "sk-fx-grace-old")
 	reqCtx := &fasthttp.RequestCtx{}
 	reqCtx.Init(&req, &net.TCPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 12345}, nil)
 	h.getVirtualKeyQuota(reqCtx)
@@ -2518,7 +2518,7 @@ func TestGetVirtualKeyQuota_ExpiredVirtualKeyRejected(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-expired")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-expired")
 	h.getVirtualKeyQuota(ctx)
 
 	if ctx.Response.StatusCode() != 403 {
@@ -2547,7 +2547,7 @@ func TestGetVirtualKeyQuota_UnexpiredVirtualKeyAllowed(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-unexpired")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-unexpired")
 	h.getVirtualKeyQuota(ctx)
 
 	if ctx.Response.StatusCode() != 200 {
@@ -2573,7 +2573,7 @@ func TestGetVirtualKeyQuota_InactiveVirtualKeyStillReadsQuota(t *testing.T) {
 	h := &GovernanceHandler{configStore: store}
 
 	ctx := &fasthttp.RequestCtx{}
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-inactive")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-inactive")
 	h.getVirtualKeyQuota(ctx)
 
 	if ctx.Response.StatusCode() != 200 {
@@ -2614,7 +2614,7 @@ func TestGetVirtualKeyQuota_WindowClampedToBudgetCreation(t *testing.T) {
 	vk := &configstoreTables.TableVirtualKey{
 		ID:       vkID,
 		Name:     "Clamp",
-		Value:    *schemas.NewSecretVar("sk-bf-clamp-secret"),
+		Value:    *schemas.NewSecretVar("sk-fx-clamp-secret"),
 		IsActive: &active,
 	}
 	if err := store.CreateVirtualKey(ctx, vk); err != nil {
@@ -2639,7 +2639,7 @@ func TestGetVirtualKeyQuota_WindowClampedToBudgetCreation(t *testing.T) {
 	h := &GovernanceHandler{configStore: store, logManager: logMgr}
 
 	var req fasthttp.Request
-	req.Header.Set("x-bf-vk", "sk-bf-clamp-secret")
+	req.Header.Set("x-bf-vk", "sk-fx-clamp-secret")
 	reqCtx := &fasthttp.RequestCtx{}
 	reqCtx.Init(&req, &net.TCPAddr{IP: net.IPv4(127, 0, 0, 1), Port: 12345}, nil)
 	h.getVirtualKeyQuota(reqCtx)

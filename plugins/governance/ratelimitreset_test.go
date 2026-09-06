@@ -126,7 +126,7 @@ func TestRequestTimeRateLimitResetSkipsReferenceRefresh(t *testing.T) {
 		t.Fatalf("expected request LastDB baseline to reset to 0, got %d", lastDBRequests)
 	}
 
-	rawVK, ok := store.virtualKeys.Load("sk-bf-reset-00000")
+	rawVK, ok := store.virtualKeys.Load("sk-fx-reset-00000")
 	if !ok || rawVK == nil {
 		t.Fatal("expected seeded virtual key to remain loaded")
 	}
@@ -158,7 +158,7 @@ func TestBackgroundRateLimitResetRefreshesReferences(t *testing.T) {
 		t.Fatalf("expected one background reset, got %d", len(resetRateLimits))
 	}
 
-	rawVK, ok := store.virtualKeys.Load("sk-bf-reset-00000")
+	rawVK, ok := store.virtualKeys.Load("sk-fx-reset-00000")
 	if !ok || rawVK == nil {
 		t.Fatal("expected seeded virtual key to remain loaded")
 	}
@@ -375,7 +375,7 @@ func TestBackgroundBudgetResetRefreshesReferences(t *testing.T) {
 	expired.LastReset = now.Add(-2 * time.Hour)
 	fresh := buildBudgetWithUsage("bg-budget-fresh", 100, 7, "1h")
 	fresh.LastReset = now.Add(-10 * time.Minute)
-	vk := buildVirtualKey("bg-vk", "sk-bf-bg-refresh", "Budget refresh VK", true)
+	vk := buildVirtualKey("bg-vk", "sk-fx-bg-refresh", "Budget refresh VK", true)
 	vk.Budgets = []configstoreTables.TableBudget{*expired, *fresh}
 	store.CreateVirtualKeyInMemory(ctx, vk)
 
@@ -392,7 +392,7 @@ func TestBackgroundBudgetResetRefreshesReferences(t *testing.T) {
 		t.Fatalf("expected 3 expired budgets to reset (vk, team, customer), got %d", len(reset))
 	}
 
-	rawVK, ok := store.virtualKeys.Load("sk-bf-bg-refresh")
+	rawVK, ok := store.virtualKeys.Load("sk-fx-bg-refresh")
 	if !ok || rawVK == nil {
 		t.Fatal("expected virtual key to remain loaded")
 	}
@@ -570,7 +570,7 @@ func TestBackgroundResetReferenceRefreshScales(t *testing.T) {
 		store.rateLimits.Store(rl.ID, rl)
 		vk := buildVirtualKeyWithRateLimit(
 			fmt.Sprintf("scale-vk-%06d", i),
-			fmt.Sprintf("sk-bf-scale-%06d", i),
+			fmt.Sprintf("sk-fx-scale-%06d", i),
 			fmt.Sprintf("Scale VK %06d", i),
 			rl,
 		)
@@ -627,7 +627,7 @@ func seed100kBudgetVK(ctx context.Context, store *LocalGovernanceStore, i int, d
 	budget.LastReset = lastReset
 	vk := buildVirtualKey(
 		fmt.Sprintf("acc-vk-%06d", i),
-		fmt.Sprintf("sk-bf-acc-%06d", i),
+		fmt.Sprintf("sk-fx-acc-%06d", i),
 		fmt.Sprintf("Accuracy VK %06d", i),
 		true,
 	)
@@ -722,7 +722,7 @@ func TestBudgetResetAccuracyAt100kKeysAllDue(t *testing.T) {
 		} else if !budget.LastReset.After(staleResets[i]) {
 			t.Fatalf("budget %06d (%s, rolling) LastReset did not advance: %v", i, duration, budget.LastReset)
 		}
-		rawVK, ok := store.virtualKeys.Load(fmt.Sprintf("sk-bf-acc-%06d", i))
+		rawVK, ok := store.virtualKeys.Load(fmt.Sprintf("sk-fx-acc-%06d", i))
 		if !ok || rawVK == nil {
 			t.Fatalf("vk %06d missing after sweep", i)
 		}
@@ -754,7 +754,7 @@ func TestBudgetResetAccuracyAt100kKeysSparse(t *testing.T) {
 		if i%10 == 7 { // sparse ownership: every 10th key has no budget
 			vk := buildVirtualKey(
 				fmt.Sprintf("acc-vk-%06d", i),
-				fmt.Sprintf("sk-bf-acc-%06d", i),
+				fmt.Sprintf("sk-fx-acc-%06d", i),
 				fmt.Sprintf("Accuracy VK %06d", i),
 				true,
 			)
@@ -852,7 +852,7 @@ func seedResetBenchmarkVirtualKeys(ctx context.Context, store *LocalGovernanceSt
 	for i := 0; i < virtualKeys; i++ {
 		vk := buildVirtualKeyWithRateLimit(
 			fmt.Sprintf("reset-vk-%05d", i),
-			fmt.Sprintf("sk-bf-reset-%05d", i),
+			fmt.Sprintf("sk-fx-reset-%05d", i),
 			fmt.Sprintf("Reset VK %05d", i),
 			rateLimit,
 		)

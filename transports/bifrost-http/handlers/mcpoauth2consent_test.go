@@ -148,15 +148,15 @@ func TestConsentAvailableModes(t *testing.T) {
 }
 
 func TestConsentFlowSubmit_VK(t *testing.T) {
-	activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-bf-active"), IsActive: new(true)}
-	inactiveVK := &configtables.TableVirtualKey{ID: "vk-row-2", Value: *schemas.NewSecretVar("sk-bf-inactive"), IsActive: new(false)}
+	activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-fx-active"), IsActive: new(true)}
+	inactiveVK := &configtables.TableVirtualKey{ID: "vk-row-2", Value: *schemas.NewSecretVar("sk-fx-inactive"), IsActive: new(false)}
 
 	t.Run("active VK mints a code", func(t *testing.T) {
 		store := newConsentStore()
-		store.vksByValue["sk-bf-active"] = activeVK
+		store.vksByValue["sk-fx-active"] = activeVK
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, nil, false)
-		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-active"}`)
+		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-active"}`)
 		h.flowSubmit(ctx)
 		require.Equal(t, fasthttp.StatusOK, ctx.Response.StatusCode(), string(ctx.Response.Body()))
 
@@ -174,7 +174,7 @@ func TestConsentFlowSubmit_VK(t *testing.T) {
 		store.vksByValue[inactiveVK.Value.GetValue()] = inactiveVK
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, nil, false)
-		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-inactive"}`)
+		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-inactive"}`)
 		h.flowSubmit(ctx)
 		assert.Equal(t, fasthttp.StatusBadRequest, ctx.Response.StatusCode())
 	})
@@ -183,7 +183,7 @@ func TestConsentFlowSubmit_VK(t *testing.T) {
 		store := newConsentStore()
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, nil, false)
-		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-missing"}`)
+		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-missing"}`)
 		h.flowSubmit(ctx)
 		assert.Equal(t, fasthttp.StatusBadRequest, ctx.Response.StatusCode())
 	})
@@ -203,11 +203,11 @@ func TestConsentFlowSubmit_VK(t *testing.T) {
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, nil, false)
 
-		first := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-active"}`)
+		first := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-active"}`)
 		h.flowSubmit(first)
 		require.Equal(t, fasthttp.StatusOK, first.Response.StatusCode())
 
-		second := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-active"}`)
+		second := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-active"}`)
 		h.flowSubmit(second)
 		assert.Equal(t, fasthttp.StatusGone, second.Response.StatusCode())
 	})
@@ -268,14 +268,14 @@ func TestConsentFlowSubmit_User(t *testing.T) {
 }
 
 func TestConsentFlowSubmit_VKUserBinding(t *testing.T) {
-	boundVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-bf-bound"), IsActive: new(true)}
+	boundVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-fx-bound"), IsActive: new(true)}
 
 	t.Run("bound VK upgrades to user when logged-in user matches", func(t *testing.T) {
 		store := newConsentStore()
 		store.vksByValue[boundVK.Value.GetValue()] = boundVK
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, &fakeResolver{userModeAvailable: true, userID: "owner-1", vkBoundUserID: "owner-1"}, false)
-		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-bound"}`)
+		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-bound"}`)
 		h.flowSubmit(ctx)
 		require.Equal(t, fasthttp.StatusOK, ctx.Response.StatusCode(), string(ctx.Response.Body()))
 		assert.Equal(t, "user", store.authReqs["flow-1"].BfMode)
@@ -287,7 +287,7 @@ func TestConsentFlowSubmit_VKUserBinding(t *testing.T) {
 		store.vksByValue[boundVK.Value.GetValue()] = boundVK
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, &fakeResolver{userModeAvailable: true, userID: "intruder", vkBoundUserID: "owner-1"}, false)
-		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-bound"}`)
+		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-bound"}`)
 		h.flowSubmit(ctx)
 		assert.Equal(t, fasthttp.StatusBadRequest, ctx.Response.StatusCode())
 	})
@@ -297,7 +297,7 @@ func TestConsentFlowSubmit_VKUserBinding(t *testing.T) {
 		store.vksByValue[boundVK.Value.GetValue()] = boundVK
 		seedPendingFlow(store, "flow-1", time.Now().Add(time.Minute))
 		h := newConsentHandler(store, &fakeResolver{userModeAvailable: true, userID: "", vkBoundUserID: "owner-1"}, false)
-		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-bf-bound"}`)
+		ctx := consentCtx("flow-1", `{"mode":"vk","value":"sk-fx-bound"}`)
 		h.flowSubmit(ctx)
 		assert.Equal(t, fasthttp.StatusBadRequest, ctx.Response.StatusCode())
 	})

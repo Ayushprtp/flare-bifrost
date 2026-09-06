@@ -340,7 +340,7 @@ The LLM test infrastructure lives in `core/internal/llmtests/`. Key patterns:
 
 **Test structure:**
 - Each scenario is a self-contained Go file with a `Run{Scenario}Test()` function
-- Signature: `func Run{Scenario}Test(t *testing.T, client *bifrost.Bifrost, ctx context.Context, testConfig ComprehensiveTestConfig)`
+- Signature: `func Run{Scenario}Test(t *testing.T, client *bifrost.Flare, ctx context.Context, testConfig ComprehensiveTestConfig)`
 - Tests run against both Chat Completions and Responses APIs (dual-API testing)
 
 **How to add a new LLM test:**
@@ -795,12 +795,12 @@ If Context7 or WebSearch yield no useful results in Step 3e:
 
 ## Project Directory Reference
 
-Quick reference for navigating the Bifrost codebase:
+Quick reference for navigating the Flare codebase:
 
 ```
 bifrost/
 ├── core/                          # Go core library
-│   ├── bifrost.go                 # Main Bifrost implementation (~195K)
+│   ├── bifrost.go                 # Main Flare implementation (~195K)
 │   ├── schemas/                   # All Go types/schemas
 │   ├── providers/                 # Provider implementations (openai, anthropic, gemini, etc.)
 │   ├── mcp/                       # MCP protocol implementation

@@ -1,8 +1,8 @@
-# E2E CLI tests (Claude Code, Codex & OpenCode through Bifrost)
+# E2E CLI tests (Claude Code, Codex & OpenCode through Flare)
 
-End-to-end tests that drive coding-assistant CLIs in **non-interactive mode** against a running Bifrost instance and assert that single-turn and multi-turn conversation features work across providers.
+End-to-end tests that drive coding-assistant CLIs in **non-interactive mode** against a running Flare instance and assert that single-turn and multi-turn conversation features work across providers.
 
-This is the CLI analog of `tests/e2e/api/` (which uses Newman/Postman for HTTP). Where the API harness exercises Bifrost's HTTP surface directly, this harness exercises Bifrost *through* the CLIs that customers actually use — but via their scripted interfaces (`claude -p`, `codex exec`), not their TUIs.
+This is the CLI analog of `tests/e2e/api/` (which uses Newman/Postman for HTTP). Where the API harness exercises Flare's HTTP surface directly, this harness exercises Flare *through* the CLIs that customers actually use — but via their scripted interfaces (`claude -p`, `codex exec`), not their TUIs.
 
 ## Why non-interactive
 
@@ -33,7 +33,7 @@ All Go files are `_test.go` so they only build under `go test`.
 ## Prerequisites
 
 1. Go 1.23+.
-2. Bifrost running locally (default `http://localhost:8080`) with at least one provider configured. The runner queries `/api/providers` and skips any provider that isn't configured.
+2. Flare running locally (default `http://localhost:8080`) with at least one provider configured. The runner queries `/api/providers` and skips any provider that isn't configured.
 3. The CLIs you want to test installed and on `PATH`:
    - `claude` — `npm i -g @anthropic-ai/claude-code`
    - `codex`  — `npm i -g @openai/codex`
@@ -56,7 +56,7 @@ make run-cli-harness-test CLI=claude PROVIDER=anthropic SCENARIO=pdf-qa
 make run-cli-harness-test TESTCASE='TestCLIs/opencode/bedrock/[^/]*nova[^/]*/simple-chat'
 make run-cli-harness-test PROVIDER=bedrock MODEL=nova PARALLEL=10 QUIET=1
 make run-cli-harness-test SCENARIO=conversation-memory                          # one scenario across the matrix
-make run-cli-harness-test BASE_URL=http://localhost:9090                        # non-default Bifrost
+make run-cli-harness-test BASE_URL=http://localhost:9090                        # non-default Flare
 make run-cli-harness-test QUIET=1                                               # CI mode
 ```
 
@@ -76,7 +76,7 @@ Environment variables:
 
 | Var | Default | Notes |
 |-----|---------|-------|
-| `BIFROST_BASE_URL` | `http://localhost:8080` | Bifrost base URL. |
+| `BIFROST_BASE_URL` | `http://localhost:8080` | Flare base URL. |
 | `BIFROST_API_KEY` | `dummy` | Sent as the CLI's API key env. |
 | `MODEL` | unset | Substring match on model ID (e.g. `MODEL=opus-4-7`, `MODEL=gpt-4o`). |
 | `TESTCASE` | unset | Full Go `-run` expression for targeting one exact subtest path. |
@@ -87,7 +87,7 @@ Environment variables:
 | `BIFROST_E2E_CLIS_PROGRESS` | unset | `1`/`0` forces the progress table on/off. Unset means on whenever the live mirror is off. |
 | `BIFROST_E2E_CLIS_PROGRESS_INTERVAL` | `10s` | Progress tick interval (any `time.ParseDuration` value). `0`/`off` disables ticking; a final table still prints. |
 
-### How each CLI is pointed at Bifrost
+### How each CLI is pointed at Flare
 
 `runCell` exports `<CLI>.BaseURLEnv` and `<CLI>.APIKeyEnv` for every cell, but only Claude is actually routed by env alone. The rest is `PreLaunch`:
 
@@ -98,15 +98,15 @@ Environment variables:
 | `codex` | generated `CODEX_HOME/config.toml` (`codexPreLaunch`) | API key, via the generated provider's `env_key = "OPENAI_API_KEY"` |
 | `opencode` | generated `OPENCODE_CONFIG` JSON (`opencodePreLaunch`) | `apiKey` in that same JSON |
 
-**Do not try to route codex with `OPENAI_BASE_URL`** — as of `codex-cli 0.146.1` the binary does not read that variable at all (the string is absent from it). Nor does exporting `OPENAI_API_KEY` alone authenticate: codex's built-in `openai` provider sets `requires_openai_auth = true`, so it opens `wss://api.openai.com/v1/responses` expecting ChatGPT OAuth tokens from `auth.json` and never falls back to the key. Both failures land as one confusing symptom, `401 Unauthorized: Missing bearer or basic authentication in header` against `api.openai.com` — i.e. the request never reached Bifrost.
+**Do not try to route codex with `OPENAI_BASE_URL`** — as of `codex-cli 0.146.1` the binary does not read that variable at all (the string is absent from it). Nor does exporting `OPENAI_API_KEY` alone authenticate: codex's built-in `openai` provider sets `requires_openai_auth = true`, so it opens `wss://api.openai.com/v1/responses` expecting ChatGPT OAuth tokens from `auth.json` and never falls back to the key. Both failures land as one confusing symptom, `401 Unauthorized: Missing bearer or basic authentication in header` against `api.openai.com` — i.e. the request never reached Flare.
 
 ### Two OpenCode entries, one binary
 
 `opencode` and `opencode-responses` run the same binary against different **wire
-formats**, because Bifrost converts requests separately per wire format and a
+formats**, because Flare converts requests separately per wire format and a
 chat/completions client cannot exercise the Responses conversion at all:
 
-| CLI | `npm` package | Bifrost route |
+| CLI | `npm` package | Flare route |
 |-----|-----|-----|
 | `opencode` | `@ai-sdk/openai-compatible` | `/openai/v1/chat/completions` |
 | `opencode-responses` | `@ai-sdk/openai` | `/openai/v1/responses` |
@@ -114,7 +114,7 @@ chat/completions client cannot exercise the Responses conversion at all:
 The substitution is documented at https://opencode.ai/docs/providers/. The `/v1`
 suffix on the Responses variant's `baseURL` matters for the same reason it does
 for codex: the SDK appends `/responses` verbatim, so without it requests land on
-Bifrost's bare `/openai/responses` alias instead of the canonical route.
+Flare's bare `/openai/responses` alias instead of the canonical route.
 
 `opencode-responses` is scoped to Anthropic-on-Bedrock only
 (`supportsCLIProviderModel`). That is deliberately narrow - it exists to cover a
@@ -152,7 +152,7 @@ than rejected when the harness used to pass it. `opencodePreLaunch` sets
 `PermissionConfig`, per [the config schema](https://opencode.ai/config.json)),
 which grants every tool without a prompt.
 
-`codexPreLaunch` sidesteps both by declaring a `bifrost` provider in a per-cell `CODEX_HOME/config.toml`, with `requires_openai_auth = false` (selects API-key auth), `env_key = "OPENAI_API_KEY"`, `supports_websockets = false` (plain HTTP POST), and `base_url` set to `BIFROST_BASE_URL + "/openai/v1"`. The `/v1` matters: codex appends `/responses` to `base_url` verbatim, so this targets Bifrost's canonical `/openai/v1/responses` rather than its bare `/openai/responses` alias.
+`codexPreLaunch` sidesteps both by declaring a `bifrost` provider in a per-cell `CODEX_HOME/config.toml`, with `requires_openai_auth = false` (selects API-key auth), `env_key = "OPENAI_API_KEY"`, `supports_websockets = false` (plain HTTP POST), and `base_url` set to `BIFROST_BASE_URL + "/openai/v1"`. The `/v1` matters: codex appends `/responses` to `base_url` verbatim, so this targets Flare's canonical `/openai/v1/responses` rather than its bare `/openai/responses` alias.
 
 **Heads-up on runtime / cost.** Default invocation runs every CLI × provider × model × scenario cell that's not gated out. Native providers carry five top models, while Azure, Bedrock, and Vertex also include the top five Anthropic-routed Claude models. At 30 s–2 min per cell that's hours and meaningful provider quota. Always filter with `CLI=`, `PROVIDER=`, `MODEL=`, or `SCENARIO=` during dev.
 
@@ -251,7 +251,7 @@ With the mirror off, the harness prints a tally every 10 seconds instead - one
 row per CLI plus a total:
 
 ```
-Bifrost CLI Harness   Elapsed 4m20s   ETA 14m27s
+Flare CLI Harness   Elapsed 4m20s   ETA 14m27s
 ┌──────────┬───────┬───────────┬──────┬──────┬───────┐
 │ Harness  │ Total │ Completed │ Pass │ Fail │ Other │
 ├──────────┼───────┼───────────┼──────┼──────┼───────┤
@@ -292,7 +292,7 @@ cancel the legs that would have shown the others still passing.
 Two consequences worth knowing:
 
 - **`latest` may be a day old.** These are third-party clients being exercised
-  against Bifrost, not dependencies being shipped, so no minimum-age floor
+  against Flare, not dependencies being shipped, so no minimum-age floor
   applies. Prereleases are excluded - `npm i -g` does not install them, so the
   release gate should not validate against them.
 - **codex floats too**, while `matrix_test.go` documents its `--image` and
@@ -387,8 +387,8 @@ Filename stem is `<cli>__<provider>__<model>__<scenario>`. Slashes in model IDs 
 ## Multi-turn implementation notes
 
 - **Claude (Pattern C)**: One long-running `claude -p --input-format stream-json --output-format stream-json --verbose` process per cell. The driver writes one JSON-Lines user message per turn to stdin; for each turn it accumulates `assistant` event text content until a `result` event closes the turn. `--verbose` is required by the SDK when output-format is stream-json. Every claude invocation (single- and multi-turn) gets `HOME` redirected to a fresh per-cell temp dir via `claudePreLaunch` — Claude Code has no `CODEX_HOME`/`XDG_CONFIG_HOME` equivalent, so this is the only way to keep it from reading the real developer's `~/.claude` (CLAUDE.md, settings, auto-memory) instead of a clean slate.
-- **Codex (Pattern B)**: One `codex exec` for turn 1, then `codex exec resume --last --json` for each subsequent turn, with `CODEX_HOME` redirected to a temp dir so `--last` always means "the last turn this test ran" (not whatever the user did in their real codex install). Each turn is its own process; the conversation persists via codex's session storage in the temp `CODEX_HOME`. That directory is created by `codexPreLaunch` (single- and multi-turn alike) and carries the generated Bifrost provider config; `codexResume.Start` reuses the `CODEX_HOME` it finds in the cell env rather than minting its own, since a second one would shadow the config — `os/exec` resolves a duplicated env key to the last occurrence — and send codex straight back to `api.openai.com`.
-- **OpenCode (Pattern B)**: One `opencode run` for turn 1, then `opencode run --continue` for each subsequent turn, with XDG config/data/cache directories redirected to a per-cell temp dir and `OPENCODE_CONFIG` pointed at a generated Bifrost provider config.
+- **Codex (Pattern B)**: One `codex exec` for turn 1, then `codex exec resume --last --json` for each subsequent turn, with `CODEX_HOME` redirected to a temp dir so `--last` always means "the last turn this test ran" (not whatever the user did in their real codex install). Each turn is its own process; the conversation persists via codex's session storage in the temp `CODEX_HOME`. That directory is created by `codexPreLaunch` (single- and multi-turn alike) and carries the generated Flare provider config; `codexResume.Start` reuses the `CODEX_HOME` it finds in the cell env rather than minting its own, since a second one would shadow the config — `os/exec` resolves a duplicated env key to the last occurrence — and send codex straight back to `api.openai.com`.
+- **OpenCode (Pattern B)**: One `opencode run` for turn 1, then `opencode run --continue` for each subsequent turn, with XDG config/data/cache directories redirected to a per-cell temp dir and `OPENCODE_CONFIG` pointed at a generated Flare provider config.
 
 ## Known limitations
 

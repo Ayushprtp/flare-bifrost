@@ -265,7 +265,7 @@ trust_level = "trusted"
 		t.Fatalf("write initial config.toml: %v", err)
 	}
 
-	if err := codexWriteNativeConfig("http://localhost:8080/openai/v1", "sk-bf-new", "gpt-5.5"); err != nil {
+	if err := codexWriteNativeConfig("http://localhost:8080/openai/v1", "sk-fx-new", "gpt-5.5"); err != nil {
 		t.Fatalf("codexWriteNativeConfig() error = %v", err)
 	}
 
@@ -278,8 +278,8 @@ trust_level = "trusted"
 	if err := sonic.Unmarshal(authBytes, &auth); err != nil {
 		t.Fatalf("unmarshal auth.json: %v", err)
 	}
-	if got, _ := auth["OPENAI_API_KEY"].(string); got != "sk-bf-new" {
-		t.Fatalf("auth.OPENAI_API_KEY = %q, want %q", got, "sk-bf-new")
+	if got, _ := auth["OPENAI_API_KEY"].(string); got != "sk-fx-new" {
+		t.Fatalf("auth.OPENAI_API_KEY = %q, want %q", got, "sk-fx-new")
 	}
 	if got, _ := auth["auth_mode"].(string); got != "apikey" {
 		t.Fatalf("auth.auth_mode = %q, want %q", got, "apikey")
@@ -326,7 +326,7 @@ func TestCodexWriteNativeConfigCreatesFilesWhenMissing(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
 
-	if err := codexWriteNativeConfig("http://localhost:8080/openai/v1", "sk-bf-fresh", ""); err != nil {
+	if err := codexWriteNativeConfig("http://localhost:8080/openai/v1", "sk-fx-fresh", ""); err != nil {
 		t.Fatalf("codexWriteNativeConfig() error = %v", err)
 	}
 
@@ -338,7 +338,7 @@ func TestCodexWriteNativeConfigCreatesFilesWhenMissing(t *testing.T) {
 	if err := sonic.Unmarshal(authBytes, &auth); err != nil {
 		t.Fatalf("unmarshal auth.json: %v", err)
 	}
-	if got, _ := auth["OPENAI_API_KEY"].(string); got != "sk-bf-fresh" {
+	if got, _ := auth["OPENAI_API_KEY"].(string); got != "sk-fx-fresh" {
 		t.Fatalf("auth.OPENAI_API_KEY = %q", got)
 	}
 

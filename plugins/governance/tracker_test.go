@@ -21,7 +21,7 @@ func TestUsageTracker_FailedRequestWithUsage_IsBilled(t *testing.T) {
 	logger := NewMockLogger()
 
 	budget := buildBudgetWithUsage("budget1", 1000.0, 0.0, "1d")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -41,7 +41,7 @@ func TestUsageTracker_FailedRequestWithUsage_IsBilled(t *testing.T) {
 		HasUsageData: true,
 	}
 
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", update))
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", update))
 
 	// Give time for async processing
 	time.Sleep(200 * time.Millisecond)
@@ -63,7 +63,7 @@ func TestUsageTracker_FailedRequestNoUsage_IsSkipped(t *testing.T) {
 	logger := NewMockLogger()
 
 	budget := buildBudgetWithUsage("budget1", 1000.0, 0.0, "1d")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -82,7 +82,7 @@ func TestUsageTracker_FailedRequestNoUsage_IsSkipped(t *testing.T) {
 		RequestID:  "req-456",
 	}
 
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", update))
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", update))
 
 	// Give time for async processing
 	time.Sleep(200 * time.Millisecond)
@@ -114,7 +114,7 @@ func TestUsageTracker_UpdateUsage_VirtualKeyNotFound(t *testing.T) {
 	}
 
 	// Should not panic or error
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", update))
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", update))
 
 	time.Sleep(100 * time.Millisecond)
 	// Just verify it doesn't crash
@@ -126,7 +126,7 @@ func TestUsageTracker_UpdateUsage_StreamingOptimization(t *testing.T) {
 	logger := NewMockLogger()
 
 	rateLimit := buildRateLimitWithUsage("rl1", 10000, 0, 1000, 0)
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -149,7 +149,7 @@ func TestUsageTracker_UpdateUsage_StreamingOptimization(t *testing.T) {
 		HasUsageData: true,
 	}
 
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", update1))
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", update1))
 	time.Sleep(200 * time.Millisecond)
 
 	// Retrieve the updated rate limit from the main RateLimits map
@@ -172,7 +172,7 @@ func TestUsageTracker_UpdateUsage_StreamingOptimization(t *testing.T) {
 		HasUsageData: true,
 	}
 
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", update2))
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", update2))
 	time.Sleep(200 * time.Millisecond)
 
 	// Retrieve the updated rate limit again
@@ -193,7 +193,7 @@ func TestUsageTracker_Idempotency_SameAttemptBilledOnce(t *testing.T) {
 	logger := NewMockLogger()
 
 	budget := buildBudgetWithUsage("budget1", 1000.0, 0.0, "1d")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -216,8 +216,8 @@ func TestUsageTracker_Idempotency_SameAttemptBilledOnce(t *testing.T) {
 		}
 	}
 
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", mk()))
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", mk())) // duplicate settlement
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", mk()))
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", mk())) // duplicate settlement
 	time.Sleep(200 * time.Millisecond)
 
 	budgets := store.GetGovernanceData(context.Background()).Budgets
@@ -236,7 +236,7 @@ func TestUsageTracker_Idempotency_DifferentAttemptsBothBilled(t *testing.T) {
 	logger := NewMockLogger()
 
 	budget := buildBudgetWithUsage("budget1", 1000.0, 0.0, "1d")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -259,8 +259,8 @@ func TestUsageTracker_Idempotency_DifferentAttemptsBothBilled(t *testing.T) {
 		}
 	}
 
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", mk(0, false, 4.0))) // failed attempt, partial usage
-	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-bf-test", schemas.OpenAI, "gpt-4", mk(1, true, 6.0)))  // successful retry
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", mk(0, false, 4.0))) // failed attempt, partial usage
+	tracker.UpdateUsage(context.Background(), settleLimits(store, "sk-fx-test", schemas.OpenAI, "gpt-4", mk(1, true, 6.0)))  // successful retry
 	time.Sleep(200 * time.Millisecond)
 
 	budgets := store.GetGovernanceData(context.Background()).Budgets

@@ -19,7 +19,7 @@ func TestLocalGovernanceStore_GetGovernanceUsageDataExcludesUnrelatedState(t *te
 	logger := NewMockLogger()
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{
-			*buildVirtualKey("vk1", "sk-bf-test1", "Test VK 1", true),
+			*buildVirtualKey("vk1", "sk-fx-test1", "Test VK 1", true),
 		},
 		Budgets:    []configstoreTables.TableBudget{{ID: "budget1"}},
 		RateLimits: []configstoreTables.TableRateLimit{{ID: "rate-limit1"}},
@@ -43,8 +43,8 @@ func TestGovernanceStore_GetVirtualKey(t *testing.T) {
 	logger := NewMockLogger()
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{
-			*buildVirtualKey("vk1", "sk-bf-test1", "Test VK 1", true),
-			*buildVirtualKey("vk2", "sk-bf-test2", "Test VK 2", false),
+			*buildVirtualKey("vk1", "sk-fx-test1", "Test VK 1", true),
+			*buildVirtualKey("vk2", "sk-fx-test2", "Test VK 2", false),
 		},
 	}, nil, nil)
 	require.NoError(t, err)
@@ -57,19 +57,19 @@ func TestGovernanceStore_GetVirtualKey(t *testing.T) {
 	}{
 		{
 			name:    "Found active VK",
-			vkValue: "sk-bf-test1",
+			vkValue: "sk-fx-test1",
 			wantNil: false,
 			wantID:  "vk1",
 		},
 		{
 			name:    "Found inactive VK",
-			vkValue: "sk-bf-test2",
+			vkValue: "sk-fx-test2",
 			wantNil: false,
 			wantID:  "vk2",
 		},
 		{
 			name:    "VK not found",
-			vkValue: "sk-bf-nonexistent",
+			vkValue: "sk-fx-nonexistent",
 			wantNil: true,
 		},
 	}
@@ -92,7 +92,7 @@ func TestGovernanceStore_GetVirtualKey(t *testing.T) {
 // TestGovernanceStore_ConcurrentReads tests lock-free concurrent reads
 func TestGovernanceStore_ConcurrentReads(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-test", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-test", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -108,7 +108,7 @@ func TestGovernanceStore_ConcurrentReads(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < 100; j++ {
-				vk, exists := store.GetVirtualKey(context.Background(), "sk-bf-test")
+				vk, exists := store.GetVirtualKey(context.Background(), "sk-fx-test")
 				if !exists || vk == nil {
 					errorCount.Add(1)
 					return
@@ -128,7 +128,7 @@ func TestGovernanceStore_ConcurrentReads(t *testing.T) {
 func TestGovernanceStore_CheckBudget_SingleBudget(t *testing.T) {
 	logger := NewMockLogger()
 	budget := buildBudgetWithUsage("budget1", 100.0, 50.0, "1d")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -137,7 +137,7 @@ func TestGovernanceStore_CheckBudget_SingleBudget(t *testing.T) {
 	require.NoError(t, err)
 
 	// Retrieve VK with budget
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 
 	tests := []struct {
 		name      string
@@ -169,13 +169,13 @@ func TestGovernanceStore_CheckBudget_SingleBudget(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create new budget with test usage
 			testBudget := buildBudgetWithUsage("budget1", tt.maxLimit, tt.usage, "1d")
-			testVK := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", testBudget)
+			testVK := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", testBudget)
 			testStore, _ := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 				VirtualKeys: []configstoreTables.TableVirtualKey{*testVK},
 				Budgets:     []configstoreTables.TableBudget{*testBudget},
 			}, nil, nil)
 
-			testVK, _ = testStore.GetVirtualKey(context.Background(), "sk-bf-test")
+			testVK, _ = testStore.GetVirtualKey(context.Background(), "sk-fx-test")
 			_, err := checkGrantBudgets(testStore, emptyCtx(), testVK, schemas.OpenAI, "", nil)
 			if tt.shouldErr {
 				assert.Error(t, err, "Expected error for usage check")
@@ -218,7 +218,7 @@ func TestGovernanceStore_CheckBudget_HierarchyValidation(t *testing.T) {
 	team.CustomerID = &customer.ID
 	team.Customer = customer
 
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", vkBudget)
 	vk.TeamID = &team.ID
 	vk.Team = team
 
@@ -230,7 +230,7 @@ func TestGovernanceStore_CheckBudget_HierarchyValidation(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 
 	// Test: All budgets under limit should pass
 	_, err = checkGrantBudgets(store, emptyCtx(), vk, schemas.OpenAI, "", nil)
@@ -259,7 +259,7 @@ func TestGovernanceStore_MultiBudget_AllUnderLimit(t *testing.T) {
 	hourlyBudget := buildBudgetWithUsage("hourly", 10.0, 5.0, "1h")
 	dailyBudget := buildBudgetWithUsage("daily", 100.0, 40.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	// Add provider config so the resolver allows the provider
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
@@ -272,7 +272,7 @@ func TestGovernanceStore_MultiBudget_AllUnderLimit(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	_, err = checkGrantBudgets(store, emptyCtx(), vk, schemas.OpenAI, "", nil)
 	assert.NoError(t, err, "Should pass when all budgets are under limit")
 }
@@ -285,7 +285,7 @@ func TestGovernanceStore_MultiBudget_SmallBudgetExceeded(t *testing.T) {
 	hourlyBudget := buildBudgetWithUsage("hourly", 10.0, 10.0, "1h")
 	dailyBudget := buildBudgetWithUsage("daily", 100.0, 40.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -297,7 +297,7 @@ func TestGovernanceStore_MultiBudget_SmallBudgetExceeded(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	_, err = checkGrantBudgets(store, emptyCtx(), vk, schemas.OpenAI, "", nil)
 	require.Error(t, err, "Should fail when hourly budget is exceeded even though daily is fine")
 	assert.Contains(t, err.Error(), "budget exceeded")
@@ -311,7 +311,7 @@ func TestGovernanceStore_MultiBudget_LargeBudgetExceeded(t *testing.T) {
 	hourlyBudget := buildBudgetWithUsage("hourly", 10.0, 3.0, "1h")
 	dailyBudget := buildBudgetWithUsage("daily", 100.0, 100.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -323,7 +323,7 @@ func TestGovernanceStore_MultiBudget_LargeBudgetExceeded(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	_, err = checkGrantBudgets(store, emptyCtx(), vk, schemas.OpenAI, "", nil)
 	require.Error(t, err, "Should fail when daily budget is exceeded even though hourly is fine")
 	assert.Contains(t, err.Error(), "budget exceeded")
@@ -336,7 +336,7 @@ func TestGovernanceStore_MultiBudget_UsageUpdatesAllBudgets(t *testing.T) {
 	hourlyBudget := buildBudget("hourly", 10.0, "1h")
 	dailyBudget := buildBudget("daily", 100.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -348,7 +348,7 @@ func TestGovernanceStore_MultiBudget_UsageUpdatesAllBudgets(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 
 	// Simulate a $3.50 request
 	err = chargeGrantBudgets(store, context.Background(), vk, schemas.OpenAI, 3.50)
@@ -390,7 +390,7 @@ func TestGovernanceStore_MultiBudget_ProviderConfigBudgets(t *testing.T) {
 	pc := buildProviderConfigWithBudgets("openai", []string{"*"},
 		[]configstoreTables.TableBudget{*pcHourly, *pcDaily})
 
-	vk := buildVirtualKeyWithProviders("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithProviders("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableVirtualKeyProviderConfig{pc})
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
@@ -399,7 +399,7 @@ func TestGovernanceStore_MultiBudget_ProviderConfigBudgets(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	_, err = checkGrantBudgets(store, emptyCtx(), vk, schemas.OpenAI, "", nil)
 	require.Error(t, err, "Should fail when provider config hourly budget is exceeded")
 	assert.Contains(t, err.Error(), "budget exceeded")
@@ -418,7 +418,7 @@ func TestGovernanceStore_MultiBudget_VKAndProviderConfigCombined(t *testing.T) {
 	pc := buildProviderConfigWithBudgets("openai", []string{"*"},
 		[]configstoreTables.TableBudget{*pcHourly})
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*vkMonthly})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{pc}
 
@@ -428,7 +428,7 @@ func TestGovernanceStore_MultiBudget_VKAndProviderConfigCombined(t *testing.T) {
 	}, nil, nil)
 	require.NoError(t, err)
 
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 
 	// Provider config budget exceeded → should block even though VK budget is fine
 	_, err = checkGrantBudgets(store, emptyCtx(), vk, schemas.OpenAI, "", nil)
@@ -444,7 +444,7 @@ func TestGovernanceStore_MultiBudget_ResolverBlocksOnBudgetExceeded(t *testing.T
 	hourlyBudget := buildBudgetWithUsage("hourly", 10.0, 10.0, "1h")
 	dailyBudget := buildBudgetWithUsage("daily", 100.0, 30.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -457,9 +457,9 @@ func TestGovernanceStore_MultiBudget_ResolverBlocksOnBudgetExceeded(t *testing.T
 	require.NoError(t, err)
 
 	resolver := NewBudgetResolver(store, nil, logger, nil)
-	ctx := resolverCtx(store, "sk-bf-test")
+	ctx := resolverCtx(store, "sk-fx-test")
 
-	result := evaluateVirtualKey(resolver, ctx, "sk-bf-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
+	result := evaluateVirtualKey(resolver, ctx, "sk-fx-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
 	assertDecision(t, DecisionBudgetExceeded, result)
 	assert.Contains(t, result.Reason, "budget exceeded")
 }
@@ -471,7 +471,7 @@ func TestGovernanceStore_MultiBudget_ResolverAllowsUnderLimit(t *testing.T) {
 	hourlyBudget := buildBudgetWithUsage("hourly", 10.0, 5.0, "1h")
 	dailyBudget := buildBudgetWithUsage("daily", 100.0, 30.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -484,9 +484,9 @@ func TestGovernanceStore_MultiBudget_ResolverAllowsUnderLimit(t *testing.T) {
 	require.NoError(t, err)
 
 	resolver := NewBudgetResolver(store, nil, logger, nil)
-	ctx := resolverCtx(store, "sk-bf-test")
+	ctx := resolverCtx(store, "sk-fx-test")
 
-	result := evaluateVirtualKey(resolver, ctx, "sk-bf-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
+	result := evaluateVirtualKey(resolver, ctx, "sk-fx-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
 	assertDecision(t, DecisionAllow, result)
 }
 
@@ -499,7 +499,7 @@ func TestGovernanceStore_MultiBudget_UsageDrivesBlockAfterRequests(t *testing.T)
 	hourlyBudget := buildBudget("hourly", 2.0, "1h")
 	dailyBudget := buildBudget("daily", 100.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*hourlyBudget, *dailyBudget})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -514,30 +514,30 @@ func TestGovernanceStore_MultiBudget_UsageDrivesBlockAfterRequests(t *testing.T)
 	resolver := NewBudgetResolver(store, nil, logger, nil)
 
 	// Request 1: $0.80 — both budgets fine
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	err = chargeGrantBudgets(store, context.Background(), vk, schemas.OpenAI, 0.80)
 	require.NoError(t, err)
 
-	ctx := resolverCtx(store, "sk-bf-test")
-	result := evaluateVirtualKey(resolver, ctx, "sk-bf-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
+	ctx := resolverCtx(store, "sk-fx-test")
+	result := evaluateVirtualKey(resolver, ctx, "sk-fx-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
 	assertDecision(t, DecisionAllow, result)
 
 	// Request 2: $0.80 — still fine ($1.60 total)
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	err = chargeGrantBudgets(store, context.Background(), vk, schemas.OpenAI, 0.80)
 	require.NoError(t, err)
 
-	ctx = resolverCtx(store, "sk-bf-test")
-	result = evaluateVirtualKey(resolver, ctx, "sk-bf-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
+	ctx = resolverCtx(store, "sk-fx-test")
+	result = evaluateVirtualKey(resolver, ctx, "sk-fx-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
 	assertDecision(t, DecisionAllow, result)
 
 	// Request 3: $0.80 — pushes hourly to $2.40 > $2.00 limit → blocked
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	err = chargeGrantBudgets(store, context.Background(), vk, schemas.OpenAI, 0.80)
 	require.NoError(t, err)
 
-	ctx = resolverCtx(store, "sk-bf-test")
-	result = evaluateVirtualKey(resolver, ctx, "sk-bf-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
+	ctx = resolverCtx(store, "sk-fx-test")
+	result = evaluateVirtualKey(resolver, ctx, "sk-fx-test", schemas.OpenAI, "gpt-4", schemas.ChatCompletionRequest, false, false)
 	assertDecision(t, DecisionBudgetExceeded, result)
 	assert.Contains(t, result.Reason, "budget exceeded")
 
@@ -568,7 +568,7 @@ func TestGovernanceStore_MultiBudget_CalendarAligned(t *testing.T) {
 		LastReset:     time.Now(),
 	}
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*dailyBudget, *monthlyBudget})
 	vk.CalendarAligned = true // VK-level setting applies to all budgets
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
@@ -582,7 +582,7 @@ func TestGovernanceStore_MultiBudget_CalendarAligned(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify VK-level calendar_aligned is set
-	vk, _ = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	vk, _ = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	assert.True(t, vk.CalendarAligned, "VK should have calendar_aligned=true")
 
 	// Both under limit — should pass
@@ -601,7 +601,7 @@ func TestGovernanceStore_MultiBudget_InMemoryCreateAndDelete(t *testing.T) {
 	b1 := buildBudget("b1", 10.0, "1h")
 	b2 := buildBudget("b2", 100.0, "1d")
 
-	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-bf-test", "Test VK",
+	vk := buildVirtualKeyWithMultiBudgets("vk1", "sk-fx-test", "Test VK",
 		[]configstoreTables.TableBudget{*b1, *b2})
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
@@ -615,7 +615,7 @@ func TestGovernanceStore_MultiBudget_InMemoryCreateAndDelete(t *testing.T) {
 	_, exists = store.budgets.Load("b2")
 	assert.True(t, exists, "Budget b2 should be in memory after create")
 
-	retrieved, found := store.GetVirtualKey(context.Background(), "sk-bf-test")
+	retrieved, found := store.GetVirtualKey(context.Background(), "sk-fx-test")
 	require.True(t, found)
 	assert.Len(t, retrieved.Budgets, 2, "VK should have 2 budgets")
 
@@ -627,7 +627,7 @@ func TestGovernanceStore_MultiBudget_InMemoryCreateAndDelete(t *testing.T) {
 	_, exists = store.budgets.Load("b2")
 	assert.False(t, exists, "Budget b2 should be removed after delete")
 
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-test")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-test")
 	assert.False(t, found, "VK should not be found after delete")
 }
 
@@ -646,7 +646,7 @@ func TestGovernanceStore_CreateVirtualKeyInMemory_DecouplesFromCallerPointer(t *
 	// A freshly-created VK loaded from DB carries no legacy rate-limit/budget — its
 	// governance lives in a VK-scoped model config, so RateLimitID is nil and Budgets empty.
 	// It does carry a provider config (with no per-provider governance of its own yet).
-	vk := buildVirtualKey("vk1", "sk-bf-test", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-test", "Test VK", true)
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
 		buildProviderConfig("openai", []string{"*"}),
 	}
@@ -669,7 +669,7 @@ func TestGovernanceStore_CreateVirtualKeyInMemory_DecouplesFromCallerPointer(t *
 
 	// The tracked VK must NOT reflect those post-create mutations, otherwise the
 	// VK-hierarchy usage path would double-count alongside the VK-scoped-model path.
-	tracked, found := store.GetVirtualKey(context.Background(), "sk-bf-test")
+	tracked, found := store.GetVirtualKey(context.Background(), "sk-fx-test")
 	require.True(t, found)
 	require.NotNil(t, tracked)
 	assert.Nil(t, tracked.RateLimit, "tracked VK rate limit must stay decoupled from caller mutation")
@@ -687,7 +687,7 @@ func TestGovernanceStore_CreateVirtualKeyInMemory_DecouplesFromCallerPointer(t *
 func TestGovernanceStore_UpdateVirtualKeyInMemory_RotatedValueRemovesOldLookup(t *testing.T) {
 	logger := NewMockLogger()
 	budget := buildBudgetWithUsage("budget1", 100.0, 25.0, "1d")
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-old", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-old", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -696,14 +696,14 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_RotatedValueRemovesOldLookup(t
 	require.NoError(t, err)
 
 	updated := *vk
-	updated.Value = *schemas.NewSecretVar("sk-bf-new")
+	updated.Value = *schemas.NewSecretVar("sk-fx-new")
 	store.UpdateVirtualKeyInMemory(context.Background(), &updated, nil, nil, nil)
 
-	oldVK, oldFound := store.GetVirtualKey(context.Background(), "sk-bf-old")
+	oldVK, oldFound := store.GetVirtualKey(context.Background(), "sk-fx-old")
 	assert.False(t, oldFound)
 	assert.Nil(t, oldVK)
 
-	newVK, newFound := store.GetVirtualKey(context.Background(), "sk-bf-new")
+	newVK, newFound := store.GetVirtualKey(context.Background(), "sk-fx-new")
 	require.True(t, newFound)
 	require.NotNil(t, newVK)
 	assert.Equal(t, "vk1", newVK.ID)
@@ -713,7 +713,7 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_RotatedValueRemovesOldLookup(t
 
 func TestGovernanceStore_UpdateVirtualKeyInMemory_GracePeriodKeepsPreviousValue(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-old", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-old", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -723,23 +723,23 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_GracePeriodKeepsPreviousValue(
 	now := time.Now().UTC()
 	exp := now.Add(5 * time.Minute)
 	rotated := *vk
-	rotated.Value = *schemas.NewSecretVar("sk-bf-new")
-	rotated.PreviousValue = *schemas.NewSecretVar("sk-bf-old")
+	rotated.Value = *schemas.NewSecretVar("sk-fx-new")
+	rotated.PreviousValue = *schemas.NewSecretVar("sk-fx-old")
 	rotated.PreviousValueExpiresAt = &exp
 	rotated.RotatedAt = &now
 	store.UpdateVirtualKeyInMemory(context.Background(), &rotated, nil, nil, nil)
 
-	newVK, found := store.GetVirtualKey(context.Background(), "sk-bf-new")
+	newVK, found := store.GetVirtualKey(context.Background(), "sk-fx-new")
 	require.True(t, found)
 	assert.Equal(t, "vk1", newVK.ID)
 
-	oldVK, found := store.GetVirtualKey(context.Background(), "sk-bf-old")
+	oldVK, found := store.GetVirtualKey(context.Background(), "sk-fx-old")
 	require.True(t, found, "previous value must authenticate during the grace period")
 	assert.Equal(t, "vk1", oldVK.ID)
 
 	byID, found := store.GetVirtualKeyByID(context.Background(), "vk1")
 	require.True(t, found)
-	assert.Equal(t, "sk-bf-new", byID.Value.GetValue())
+	assert.Equal(t, "sk-fx-new", byID.Value.GetValue())
 }
 
 // TestGovernanceStore_StoreVirtualKey_GraceAliasDoesNotDisplaceCurrentOwner pins
@@ -752,10 +752,10 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_GracePeriodKeepsPreviousValue(
 // current value hash before the grace hash.
 func TestGovernanceStore_StoreVirtualKey_GraceAliasDoesNotDisplaceCurrentOwner(t *testing.T) {
 	logger := NewMockLogger()
-	const shared = "sk-bf-shared"
+	const shared = "sk-fx-shared"
 
 	vkA := buildVirtualKey("vk-a", shared, "Rotating VK", true)
-	vkB := buildVirtualKey("vk-b", "sk-bf-b-original", "Owner VK", true)
+	vkB := buildVirtualKey("vk-b", "sk-fx-b-original", "Owner VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vkA, *vkB},
 	}, nil, nil)
@@ -765,7 +765,7 @@ func TestGovernanceStore_StoreVirtualKey_GraceAliasDoesNotDisplaceCurrentOwner(t
 	now := time.Now().UTC()
 	exp := now.Add(5 * time.Minute)
 	rotatedA := *vkA
-	rotatedA.Value = *schemas.NewSecretVar("sk-bf-a-new")
+	rotatedA.Value = *schemas.NewSecretVar("sk-fx-a-new")
 	rotatedA.PreviousValue = *schemas.NewSecretVar(shared)
 	rotatedA.PreviousValueExpiresAt = &exp
 	rotatedA.RotatedAt = &now
@@ -796,7 +796,7 @@ func TestGovernanceStore_StoreVirtualKey_GraceAliasDoesNotDisplaceCurrentOwner(t
 	assert.Equal(t, "vk-b", afterTouch.ID, "re-registering a grace alias must not displace the current owner")
 
 	// VK-A itself keeps working under its own current value.
-	stillA, found := store.GetVirtualKey(context.Background(), "sk-bf-a-new")
+	stillA, found := store.GetVirtualKey(context.Background(), "sk-fx-a-new")
 	require.True(t, found)
 	assert.Equal(t, "vk-a", stillA.ID)
 }
@@ -809,7 +809,7 @@ func sharedValueStore(t *testing.T, shared string) *LocalGovernanceStore {
 	t.Helper()
 	logger := NewMockLogger()
 	vkA := buildVirtualKey("vk-a", shared, "Rotating VK", true)
-	vkB := buildVirtualKey("vk-b", "sk-bf-b-original", "Owner VK", true)
+	vkB := buildVirtualKey("vk-b", "sk-fx-b-original", "Owner VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vkA, *vkB},
 	}, nil, nil)
@@ -818,7 +818,7 @@ func sharedValueStore(t *testing.T, shared string) *LocalGovernanceStore {
 	now := time.Now().UTC()
 	exp := now.Add(5 * time.Minute)
 	rotatedA := *vkA
-	rotatedA.Value = *schemas.NewSecretVar("sk-bf-a-new")
+	rotatedA.Value = *schemas.NewSecretVar("sk-fx-a-new")
 	rotatedA.PreviousValue = *schemas.NewSecretVar(shared)
 	rotatedA.PreviousValueExpiresAt = &exp
 	rotatedA.RotatedAt = &now
@@ -840,13 +840,13 @@ func sharedValueStore(t *testing.T, shared string) *LocalGovernanceStore {
 // VK-B as a current credential, so removing it would silently deauthenticate a
 // live key.
 func TestGovernanceStore_ReRotationDoesNotEvictAnotherKeysCurrentValue(t *testing.T) {
-	const shared = "sk-bf-shared-rerotate"
+	const shared = "sk-fx-shared-rerotate"
 	store := sharedValueStore(t, shared)
 
 	// VK-A rotates again with the cooldown disabled, so every alias it held
 	// falls out of the keep set.
 	later := time.Now().UTC().Add(time.Minute)
-	rerotatedA := *buildVirtualKey("vk-a", "sk-bf-a-newest", "Rotating VK", true)
+	rerotatedA := *buildVirtualKey("vk-a", "sk-fx-a-newest", "Rotating VK", true)
 	rerotatedA.RotatedAt = &later
 	rerotatedA.ClearPreviousValue()
 	store.UpdateVirtualKeyInMemory(context.Background(), &rerotatedA, nil, nil, nil)
@@ -855,7 +855,7 @@ func TestGovernanceStore_ReRotationDoesNotEvictAnotherKeysCurrentValue(t *testin
 	require.True(t, found, "re-rotating VK-A must not evict the value VK-B owns")
 	assert.Equal(t, "vk-b", afterRotate.ID)
 
-	stillA, found := store.GetVirtualKey(context.Background(), "sk-bf-a-newest")
+	stillA, found := store.GetVirtualKey(context.Background(), "sk-fx-a-newest")
 	require.True(t, found)
 	assert.Equal(t, "vk-a", stillA.ID)
 }
@@ -864,7 +864,7 @@ func TestGovernanceStore_ReRotationDoesNotEvictAnotherKeysCurrentValue(t *testin
 // same ownership rule on the deletion path, which clears the deleted key's
 // current and grace-period aliases.
 func TestGovernanceStore_DeletionDoesNotEvictAnotherKeysCurrentValue(t *testing.T) {
-	const shared = "sk-bf-shared-delete"
+	const shared = "sk-fx-shared-delete"
 	store := sharedValueStore(t, shared)
 
 	// VK-A still carries the shared value as its grace-period previous value.
@@ -874,13 +874,13 @@ func TestGovernanceStore_DeletionDoesNotEvictAnotherKeysCurrentValue(t *testing.
 	require.True(t, found, "deleting VK-A must not evict the value VK-B owns")
 	assert.Equal(t, "vk-b", afterDelete.ID)
 
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-a-new")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-a-new")
 	assert.False(t, found, "the deleted key's own value must stop authenticating")
 }
 
 func TestGovernanceStore_GetVirtualKey_ExpiredPreviousValueRejectedAndCleaned(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-old", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-old", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -892,37 +892,37 @@ func TestGovernanceStore_GetVirtualKey_ExpiredPreviousValueRejectedAndCleaned(t 
 	now := time.Now().UTC()
 	exp := now.Add(5 * time.Minute)
 	rotated := *vk
-	rotated.Value = *schemas.NewSecretVar("sk-bf-new")
-	rotated.PreviousValue = *schemas.NewSecretVar("sk-bf-old")
+	rotated.Value = *schemas.NewSecretVar("sk-fx-new")
+	rotated.PreviousValue = *schemas.NewSecretVar("sk-fx-old")
 	rotated.PreviousValueExpiresAt = &exp
 	rotated.RotatedAt = &now
 	store.UpdateVirtualKeyInMemory(context.Background(), &rotated, nil, nil, nil)
 
-	_, found := store.GetVirtualKey(context.Background(), "sk-bf-old")
+	_, found := store.GetVirtualKey(context.Background(), "sk-fx-old")
 	require.True(t, found, "grace value must work before expiry")
 
-	storedVK, found := store.GetVirtualKey(context.Background(), "sk-bf-new")
+	storedVK, found := store.GetVirtualKey(context.Background(), "sk-fx-new")
 	require.True(t, found)
 	past := now.Add(-time.Millisecond)
 	storedVK.PreviousValueExpiresAt = &past
 
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-old")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-old")
 	assert.False(t, found, "grace value must stop working after expiry")
 
 	// Lazy cleanup must not touch the current value or the ID index.
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-new")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-new")
 	assert.True(t, found)
 	_, found = store.GetVirtualKeyByID(context.Background(), "vk1")
 	assert.True(t, found)
 
 	// The expired entry itself is gone from the map.
-	_, stale := store.virtualKeys.Load("sk-bf-old")
+	_, stale := store.virtualKeys.Load("sk-fx-old")
 	assert.False(t, stale, "expired previous-value entry must be lazily deleted")
 }
 
 func TestGovernanceStore_UpdateVirtualKeyInMemory_UnresolvableValueRemovesIDIndex(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-live", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-live", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -937,7 +937,7 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_UnresolvableValueRemovesIDInde
 	updated.Value = *schemas.NewSecretVar("env.BIFROST_TEST_UNSET_VK_VALUE")
 	store.UpdateVirtualKeyInMemory(context.Background(), &updated, nil, nil, nil)
 
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-live")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-live")
 	assert.False(t, found, "old value key must not authenticate after update")
 	_, found = store.GetVirtualKeyByID(context.Background(), "vk1")
 	assert.False(t, found, "ID index must fail closed when the new value cannot resolve")
@@ -945,7 +945,7 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_UnresolvableValueRemovesIDInde
 
 func TestGovernanceStore_UpdateVirtualKeyInMemory_UnresolvableValueRemovesGraceKey(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-old", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-old", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -955,13 +955,13 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_UnresolvableValueRemovesGraceK
 	now := time.Now().UTC()
 	exp := now.Add(5 * time.Minute)
 	rotated := *vk
-	rotated.Value = *schemas.NewSecretVar("sk-bf-new")
-	rotated.PreviousValue = *schemas.NewSecretVar("sk-bf-old")
+	rotated.Value = *schemas.NewSecretVar("sk-fx-new")
+	rotated.PreviousValue = *schemas.NewSecretVar("sk-fx-old")
 	rotated.PreviousValueExpiresAt = &exp
 	rotated.RotatedAt = &now
 	store.UpdateVirtualKeyInMemory(context.Background(), &rotated, nil, nil, nil)
 
-	_, found := store.GetVirtualKey(context.Background(), "sk-bf-old")
+	_, found := store.GetVirtualKey(context.Background(), "sk-fx-old")
 	require.True(t, found, "grace value must authenticate before the broken update")
 
 	// Update to a current value that cannot resolve (unset env ref) while the
@@ -971,19 +971,19 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_UnresolvableValueRemovesGraceK
 	broken.Value = *schemas.NewSecretVar("env.BIFROST_TEST_UNSET_VK_VALUE")
 	store.UpdateVirtualKeyInMemory(context.Background(), &broken, nil, nil, nil)
 
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-new")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-new")
 	assert.False(t, found, "old current value must not authenticate after the broken update")
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-old")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-old")
 	assert.False(t, found, "grace value must fail closed when the new value cannot resolve")
 	_, found = store.GetVirtualKeyByID(context.Background(), "vk1")
 	assert.False(t, found, "ID index must fail closed when the new value cannot resolve")
-	_, stale := store.virtualKeys.Load("sk-bf-old")
+	_, stale := store.virtualKeys.Load("sk-fx-old")
 	assert.False(t, stale, "previous-value entry must be removed from the map")
 }
 
 func TestGovernanceStore_UpdateVirtualKeyInMemory_RepeatedRotationDropsStalePrevious(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-v1", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-v1", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -993,8 +993,8 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_RepeatedRotationDropsStalePrev
 	exp := now.Add(5 * time.Minute)
 
 	first := *vk
-	first.Value = *schemas.NewSecretVar("sk-bf-v2")
-	first.PreviousValue = *schemas.NewSecretVar("sk-bf-v1")
+	first.Value = *schemas.NewSecretVar("sk-fx-v2")
+	first.PreviousValue = *schemas.NewSecretVar("sk-fx-v1")
 	first.PreviousValueExpiresAt = &exp
 	first.RotatedAt = &now
 	store.UpdateVirtualKeyInMemory(context.Background(), &first, nil, nil, nil)
@@ -1002,23 +1002,23 @@ func TestGovernanceStore_UpdateVirtualKeyInMemory_RepeatedRotationDropsStalePrev
 	// Second rotation inside the grace window: v2 becomes the grace value and v1
 	// dies immediately (only one grace value at a time).
 	second := first
-	second.Value = *schemas.NewSecretVar("sk-bf-v3")
-	second.PreviousValue = *schemas.NewSecretVar("sk-bf-v2")
+	second.Value = *schemas.NewSecretVar("sk-fx-v3")
+	second.PreviousValue = *schemas.NewSecretVar("sk-fx-v2")
 	store.UpdateVirtualKeyInMemory(context.Background(), &second, nil, nil, nil)
 
-	_, found := store.GetVirtualKey(context.Background(), "sk-bf-v3")
+	_, found := store.GetVirtualKey(context.Background(), "sk-fx-v3")
 	assert.True(t, found)
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-v2")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-v2")
 	assert.True(t, found, "newest previous value must authenticate")
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-v1")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-v1")
 	assert.False(t, found, "second-oldest value must die on repeated rotation")
-	_, stale := store.virtualKeys.Load("sk-bf-v1")
+	_, stale := store.virtualKeys.Load("sk-fx-v1")
 	assert.False(t, stale, "stale previous key must be removed from the map")
 }
 
 func TestGovernanceStore_DeleteVirtualKeyInMemory_RemovesGraceKey(t *testing.T) {
 	logger := NewMockLogger()
-	vk := buildVirtualKey("vk1", "sk-bf-old", "Test VK", true)
+	vk := buildVirtualKey("vk1", "sk-fx-old", "Test VK", true)
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
 	}, nil, nil)
@@ -1027,17 +1027,17 @@ func TestGovernanceStore_DeleteVirtualKeyInMemory_RemovesGraceKey(t *testing.T) 
 	now := time.Now().UTC()
 	exp := now.Add(5 * time.Minute)
 	rotated := *vk
-	rotated.Value = *schemas.NewSecretVar("sk-bf-new")
-	rotated.PreviousValue = *schemas.NewSecretVar("sk-bf-old")
+	rotated.Value = *schemas.NewSecretVar("sk-fx-new")
+	rotated.PreviousValue = *schemas.NewSecretVar("sk-fx-old")
 	rotated.PreviousValueExpiresAt = &exp
 	rotated.RotatedAt = &now
 	store.UpdateVirtualKeyInMemory(context.Background(), &rotated, nil, nil, nil)
 
 	store.DeleteVirtualKeyInMemory(context.Background(), "vk1")
 
-	_, found := store.GetVirtualKey(context.Background(), "sk-bf-new")
+	_, found := store.GetVirtualKey(context.Background(), "sk-fx-new")
 	assert.False(t, found, "current value must not authenticate after delete")
-	_, found = store.GetVirtualKey(context.Background(), "sk-bf-old")
+	_, found = store.GetVirtualKey(context.Background(), "sk-fx-old")
 	assert.False(t, found, "grace value must not authenticate after delete")
 	_, found = store.GetVirtualKeyByID(context.Background(), "vk1")
 	assert.False(t, found)
@@ -1048,7 +1048,7 @@ func TestGovernanceStore_UpdateRateLimitUsage_TokensAndRequests(t *testing.T) {
 	logger := NewMockLogger()
 
 	rateLimit := buildRateLimitWithUsage("rl1", 10000, 0, 1000, 0)
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -1101,7 +1101,7 @@ func TestGovernanceStore_ResetExpiredRateLimits(t *testing.T) {
 		RequestLastReset:     time.Now().Add(-2 * time.Minute), // Expired
 	}
 
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-test", "Test VK", rateLimit)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-test", "Test VK", rateLimit)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -1115,7 +1115,7 @@ func TestGovernanceStore_ResetExpiredRateLimits(t *testing.T) {
 	assert.NoError(t, err, "Reset should succeed")
 
 	// Retrieve the updated VK to check rate limit changes
-	updatedVK, _ := store.GetVirtualKey(context.Background(), "sk-bf-test")
+	updatedVK, _ := store.GetVirtualKey(context.Background(), "sk-fx-test")
 	require.NotNil(t, updatedVK)
 	require.NotNil(t, updatedVK.RateLimit)
 
@@ -1136,7 +1136,7 @@ func TestGovernanceStore_ResetExpiredBudgets(t *testing.T) {
 		LastReset:     time.Now().Add(-48 * time.Hour), // Expired
 	}
 
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-test", "Test VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-test", "Test VK", budget)
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
 		VirtualKeys: []configstoreTables.TableVirtualKey{*vk},
@@ -1150,7 +1150,7 @@ func TestGovernanceStore_ResetExpiredBudgets(t *testing.T) {
 	assert.NoError(t, err, "Reset should succeed")
 
 	// Retrieve the updated VK to check budget changes
-	updatedVK, _ := store.GetVirtualKey(context.Background(), "sk-bf-test")
+	updatedVK, _ := store.GetVirtualKey(context.Background(), "sk-fx-test")
 	require.NotNil(t, updatedVK)
 	require.True(t, len(updatedVK.Budgets) > 0, "VK should have budgets")
 
@@ -1681,7 +1681,7 @@ func TestSettledLimitsAreWhatIsAccounted(t *testing.T) {
 	team.CustomerID = &customer.ID
 	team.Customer = customer
 
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-collect", "Collecting VK", vkBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-collect", "Collecting VK", vkBudget)
 	vk.TeamID = &team.ID
 	vk.Team = team
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
@@ -1704,7 +1704,7 @@ func TestSettledLimitsAreWhatIsAccounted(t *testing.T) {
 	// afterwards reads them from there rather than working out a second answer.
 	settle := func(t *testing.T, provider schemas.ModelProvider, model string) schemas.Limits {
 		t.Helper()
-		limits := settleAttemptLimits(resolverCtx(store, "sk-bf-collect"), store, provider, model)
+		limits := settleAttemptLimits(resolverCtx(store, "sk-fx-collect"), store, provider, model)
 		require.NotNil(t, limits)
 		return limits
 	}
@@ -1762,7 +1762,7 @@ func TestResolveLimits(t *testing.T) {
 	modelBudget := buildBudget("b-model", 1000, "1d")
 
 	team := buildTeam("team1", "Team 1", teamBudget)
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-resolve", "Resolving VK", keyBudget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-resolve", "Resolving VK", keyBudget)
 	vk.TeamID = &team.ID
 	vk.Team = team
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
@@ -1786,7 +1786,7 @@ func TestResolveLimits(t *testing.T) {
 		// from the store by the permit's identity. Nothing that answers the same for every provider,
 		// because that cannot help it choose. And nothing is settled on the grant yet, which is not
 		// the same as nothing applying.
-		ctx := resolverCtx(store, "sk-bf-resolve")
+		ctx := resolverCtx(store, "sk-fx-resolve")
 		access := ctx.Grant().Access()
 		require.NotNil(t, access)
 		require.Len(t, access.Bases(), 1)
@@ -1799,7 +1799,7 @@ func TestResolveLimits(t *testing.T) {
 	})
 
 	t.Run("after it runs, the grant carries exactly what this pair answers to", func(t *testing.T) {
-		ctx := resolverCtx(store, "sk-bf-resolve")
+		ctx := resolverCtx(store, "sk-fx-resolve")
 
 		settled := settleAttemptLimits(ctx, store, schemas.OpenAI, "gpt-4o")
 
@@ -1812,7 +1812,7 @@ func TestResolveLimits(t *testing.T) {
 	})
 
 	t.Run("the settled limits are what everything downstream reads", func(t *testing.T) {
-		ctx := resolverCtx(store, "sk-bf-resolve")
+		ctx := resolverCtx(store, "sk-fx-resolve")
 
 		settled := settleAttemptLimits(ctx, store, schemas.OpenAI, "gpt-4o")
 
@@ -1823,7 +1823,7 @@ func TestResolveLimits(t *testing.T) {
 	t.Run("the next attempt replaces them whole", func(t *testing.T) {
 		// A request that fails over changes its provider, not its caller: the access stays, and the
 		// limits are settled again for the pair the new attempt uses.
-		ctx := resolverCtx(store, "sk-bf-resolve")
+		ctx := resolverCtx(store, "sk-fx-resolve")
 		access := ctx.Grant().Access()
 
 		first := settleAttemptLimits(ctx, store, schemas.OpenAI, "gpt-4o")
@@ -1858,7 +1858,7 @@ func TestResolveLimits(t *testing.T) {
 	})
 
 	t.Run("a modelless attempt still answers to its provider", func(t *testing.T) {
-		ctx := resolverCtx(store, "sk-bf-resolve")
+		ctx := resolverCtx(store, "sk-fx-resolve")
 
 		settled := settleAttemptLimits(ctx, store, schemas.OpenAI, "")
 
@@ -1875,7 +1875,7 @@ func TestResolveLimits(t *testing.T) {
 // Each case loads exactly one source at 40% and asserts the status reports 40: a source that is not
 // reached reports 0, so this fails for whichever one is missed rather than only for the total.
 func TestGetBudgetAndRateLimitStatusReachesEverySource(t *testing.T) {
-	const vkValue = "sk-bf-status"
+	const vkValue = "sk-fx-status"
 
 	newStore := func(t *testing.T, build func(vk *configstoreTables.TableVirtualKey, cfg *configstore.GovernanceConfig)) *LocalGovernanceStore {
 		t.Helper()

@@ -125,7 +125,7 @@ func TestLoadVirtualMCPs_RoundTrip(t *testing.T) {
 	t.Cleanup(func() { require.NoError(t, cs.Close(ctx)) })
 
 	// A virtual key to hang the assignment off of.
-	require.NoError(t, cs.DB().WithContext(ctx).Create(buildVirtualKey("vk-1", "sk-bf-vmcp", "VK", true)).Error)
+	require.NoError(t, cs.DB().WithContext(ctx).Create(buildVirtualKey("vk-1", "sk-fx-vmcp", "VK", true)).Error)
 
 	enabled := &configstoreTables.TableVirtualMCP{
 		Name: "eng", EndpointSlug: "eng", Enabled: true,

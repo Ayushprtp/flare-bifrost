@@ -5018,7 +5018,7 @@ func (h *GovernanceHandler) buildBudgetsWithUsage(ctx context.Context, vkID, usa
 // This is a self-service endpoint — no admin auth required. The VK value in the header is the credential.
 func (h *GovernanceHandler) getVirtualKeyQuota(ctx *fasthttp.RequestCtx) {
 	// Extract virtual key using the same logic as the inference path (lib/ctx.go):
-	// x-bf-vk accepts any value; other headers require the sk-bf- prefix.
+	// x-bf-vk accepts any value; other headers require the sk-fx- prefix.
 	var vkValue string
 	if v := string(ctx.Request.Header.Peek("x-bf-vk")); v != "" {
 		vkValue = v

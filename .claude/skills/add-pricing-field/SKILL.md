@@ -1,12 +1,12 @@
 ---
 name: add-pricing-field
-description: Wire a new model-pricing field (a datasheet cost key like `cost_per_request`, `output_cost_per_video_per_second_720p`, etc.) end-to-end through Bifrost's pricing engine - Options struct, DB table + migration, datasheet sync upsert columns, cost calculation, custom pricing overrides, public API, OpenAPI docs, MDX docs, and the UI override form. Ends with a repo-wide probe to confirm nothing was missed. Invoked with /add-pricing-field <field_name> or /add-pricing-field (asks for the field).
+description: Wire a new model-pricing field (a datasheet cost key like `cost_per_request`, `output_cost_per_video_per_second_720p`, etc.) end-to-end through Flare's pricing engine - Options struct, DB table + migration, datasheet sync upsert columns, cost calculation, custom pricing overrides, public API, OpenAPI docs, MDX docs, and the UI override form. Ends with a repo-wide probe to confirm nothing was missed. Invoked with /add-pricing-field <field_name> or /add-pricing-field (asks for the field).
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, AskUserQuestion
 ---
 
 # Add Pricing Field
 
-Add a new per-model pricing field to Bifrost's cost engine so it is parsed from the upstream
+Add a new per-model pricing field to Flare's cost engine so it is parsed from the upstream
 datasheet, persisted, billed correctly, overridable, and documented — with no silent gap.
 
 The pricing engine has one source-of-truth shape (`Options` in `framework/modelcatalog/datasheet/types.go`)

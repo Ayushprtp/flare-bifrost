@@ -30,7 +30,7 @@ func newStandaloneStore(t *testing.T) *LocalGovernanceStore {
 // the full governance snapshot path.
 func TestGetVirtualKeyByID(t *testing.T) {
 	store := newStandaloneStore(t)
-	vk := &configstoreTables.TableVirtualKey{ID: "vk-id", Name: "test", Value: *schemas.NewSecretVar("sk-bf-test")}
+	vk := &configstoreTables.TableVirtualKey{ID: "vk-id", Name: "test", Value: *schemas.NewSecretVar("sk-fx-test")}
 	store.storeVirtualKey(vk.Value.GetValue(), vk)
 
 	got, found := store.GetVirtualKeyByID(context.Background(), vk.ID)

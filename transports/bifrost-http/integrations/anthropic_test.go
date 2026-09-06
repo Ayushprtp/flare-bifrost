@@ -431,7 +431,7 @@ func TestCheckAnthropicPassthrough_OAuthHeaderRouting(t *testing.T) {
 	// OAuth mode: an sk-ant-oat bearer and no x-api-key.
 	reqCtx.Request.Header.Set("Authorization", "Bearer sk-ant-oat01-caller-token")
 	reqCtx.Request.Header.Set("anthropic-beta", "interleaved-thinking-2025-05-14")
-	reqCtx.Request.Header.Set("x-bf-vk", "sk-bf-must-not-leak")
+	reqCtx.Request.Header.Set("x-bf-vk", "sk-fx-must-not-leak")
 	reqCtx.Request.Header.Set("x-forwarded-for", "10.30.10.147")
 	reqCtx.Request.Header.Set("x-claude-code-session-id", "sess-1")
 

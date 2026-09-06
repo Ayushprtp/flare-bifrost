@@ -27,7 +27,7 @@ node dist/index.js
 
 ## Integration Testing
 
-This server is designed to test error handling in Bifrost's MCP integration via STDIO transport.
+This server is designed to test error handling in Flare's MCP integration via STDIO transport.
 
 ### Example Tool Calls
 

@@ -33,7 +33,7 @@ This creates `build/llm-only.so`
 
 ## Configuration
 
-Add to your Bifrost config:
+Add to your Flare config:
 
 ```json
 {

@@ -46,9 +46,9 @@ import (
 )
 
 // virtualKeyPrefix mirrors governance.VirtualKeyPrefix; the value format is
-// "sk-bf-<uuid>". It is duplicated here to avoid importing the governance plugin
+// "sk-fx-<uuid>". It is duplicated here to avoid importing the governance plugin
 // (which lives in a separate module) into this seeding utility.
-const virtualKeyPrefix = "sk-bf-"
+const virtualKeyPrefix = "sk-fx-"
 
 // Fixed budget assigned to each seeded virtual key. A budget belongs to the VK
 // via governance_budgets.virtual_key_id (a VK may own several budgets).

@@ -60,7 +60,7 @@ func restrictedAccess(client string, tools ...string) schemas.Access {
 // the inference-path header set (x-bf-vk, Authorization Bearer, x-api-key,
 // x-goog-api-key) so MCP and inference stay at parity.
 func TestGetVKFromRequest(t *testing.T) {
-	const vk = "sk-bf-test-virtual-key"
+	const vk = "sk-fx-test-virtual-key"
 
 	cases := []struct {
 		name   string
@@ -106,7 +106,7 @@ func TestGetVKFromRequest(t *testing.T) {
 			name: "x-bf-vk takes priority over x-goog-api-key",
 			setup: func(ctx *fasthttp.RequestCtx) {
 				ctx.Request.Header.Set("x-bf-vk", vk)
-				ctx.Request.Header.Set("x-goog-api-key", "sk-bf-other")
+				ctx.Request.Header.Set("x-goog-api-key", "sk-fx-other")
 			},
 			wantVK: vk,
 		},
@@ -147,7 +147,7 @@ func TestAuthenticate_JWTPath(t *testing.T) {
 	}
 
 	t.Run("oauth mode: vk JWT stamps the key's value for governance to resolve", func(t *testing.T) {
-		activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-bf-active"), IsActive: new(true)}
+		activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-fx-active"), IsActive: new(true)}
 		store := &mockOAuth2Store{signingKey: key, vksByID: map[string]*configtables.TableVirtualKey{"vk-row-1": activeVK}}
 		h := newTestMCPHandler(newTestOAuth2Config(store, configtables.MCPServerAuthModeOAuth, false))
 
@@ -155,14 +155,14 @@ func TestAuthenticate_JWTPath(t *testing.T) {
 		ctx.Request.Header.Set("Authorization", "Bearer "+vkToken("vk-row-1"))
 
 		require.NoError(t, h.authenticate(ctx, bifrostCtx))
-		assert.Equal(t, "sk-bf-active", stringFromCtx(bifrostCtx, schemas.BifrostContextKeyVirtualKey))
+		assert.Equal(t, "sk-fx-active", stringFromCtx(bifrostCtx, schemas.BifrostContextKeyVirtualKey))
 		assert.Empty(t, stringFromCtx(bifrostCtx, schemas.BifrostContextKeyUserID))
 	})
 
 	// Whether a key may still be used is governance's answer, read off the grant it resolves, so the
 	// same key is refused the same way on every path. Authentication only stamps it.
 	t.Run("vk JWT with an inactive key is stamped rather than refused here", func(t *testing.T) {
-		inactiveVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-bf-x"), IsActive: new(false)}
+		inactiveVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-fx-x"), IsActive: new(false)}
 		store := &mockOAuth2Store{signingKey: key, vksByID: map[string]*configtables.TableVirtualKey{"vk-row-1": inactiveVK}}
 		h := newTestMCPHandler(newTestOAuth2Config(store, configtables.MCPServerAuthModeBoth, false))
 
@@ -170,7 +170,7 @@ func TestAuthenticate_JWTPath(t *testing.T) {
 		ctx.Request.Header.Set("Authorization", "Bearer "+vkToken("vk-row-1"))
 
 		require.NoError(t, h.authenticate(ctx, bifrostCtx))
-		assert.Equal(t, "sk-bf-x", stringFromCtx(bifrostCtx, schemas.BifrostContextKeyVirtualKey))
+		assert.Equal(t, "sk-fx-x", stringFromCtx(bifrostCtx, schemas.BifrostContextKeyVirtualKey))
 	})
 
 	t.Run("vk JWT for an unknown key is rejected", func(t *testing.T) {
@@ -185,7 +185,7 @@ func TestAuthenticate_JWTPath(t *testing.T) {
 	})
 
 	t.Run("vk JWT is rejected once virtual-key identity is disabled and user mode is offered", func(t *testing.T) {
-		activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-bf-active"), IsActive: new(true)}
+		activeVK := &configtables.TableVirtualKey{ID: "vk-row-1", Value: *schemas.NewSecretVar("sk-fx-active"), IsActive: new(true)}
 		store := &mockOAuth2Store{signingKey: key, vksByID: map[string]*configtables.TableVirtualKey{"vk-row-1": activeVK}}
 		cfg := newTestOAuth2Config(store, configtables.MCPServerAuthModeBoth, false)
 		cfg.ClientConfig.OAuth2ServerConfig.DisableVKIdentity = true
@@ -275,7 +275,7 @@ func TestAuthenticate_JWTPath(t *testing.T) {
 
 		ctx, bifrostCtx := newRequestCtx()
 		ctx.Request.Header.Set("Authorization", "Bearer "+sessionToken("session-abc"))
-		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-bf-header")
+		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-fx-header")
 
 		err := h.authenticate(ctx, bifrostCtx)
 		require.Error(t, err)
@@ -288,7 +288,7 @@ func TestAuthenticate_JWTPath(t *testing.T) {
 
 		ctx, bifrostCtx := newRequestCtx()
 		ctx.Request.Header.Set("Authorization", "Bearer "+vkToken("vk-row-1"))
-		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-bf-header")
+		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-fx-header")
 
 		err := h.authenticate(ctx, bifrostCtx)
 		require.Error(t, err)
@@ -309,7 +309,7 @@ func TestAuthenticate_HeaderAndAnonPath(t *testing.T) {
 		h := newTestMCPHandler(newTestOAuth2Config(store, configtables.MCPServerAuthModeHeaders, true))
 
 		ctx, bifrostCtx := newRequestCtx()
-		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-bf-anything")
+		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-fx-anything")
 
 		require.NoError(t, h.authenticate(ctx, bifrostCtx))
 	})
@@ -360,7 +360,7 @@ func TestAuthenticate_HeaderAndAnonPath(t *testing.T) {
 		h := newTestMCPHandler(newTestOAuth2Config(store, configtables.MCPServerAuthModeOAuth, false))
 
 		ctx, bifrostCtx := newRequestCtx()
-		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-bf-active")
+		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-fx-active")
 
 		require.Error(t, h.authenticate(ctx, bifrostCtx))
 		assert.NotEmpty(t, ctx.Response.Header.Peek("WWW-Authenticate"))
@@ -493,7 +493,7 @@ func TestAdmit(t *testing.T) {
 		admitter := &fakeAdmitter{access: restrictedAccess("sentry", "find_projects")}
 		h := newHandler(configtables.MCPServerAuthModeHeaders, admitter)
 		ctx, bifrostCtx := newRequestCtx()
-		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-bf-active")
+		ctx.Request.Header.Set(string(schemas.BifrostContextKeyVirtualKey), "sk-fx-active")
 		require.Nil(t, h.admit(ctx, bifrostCtx))
 		assert.Same(t, bifrostCtx, admitter.seen)
 	})

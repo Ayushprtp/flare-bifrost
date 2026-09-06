@@ -86,9 +86,9 @@ func TestPreRequestHook_MaterializesVirtualKeyRoutingAfterRules(t *testing.T) {
 		Priority: 0,
 	}))
 
-	vk := &configstoreTables.TableVirtualKey{ID: "vk-1", Name: "vk", Value: *schemas.NewSecretVar("sk-bf-test"), IsActive: bifrost.Ptr(true)}
+	vk := &configstoreTables.TableVirtualKey{ID: "vk-1", Name: "vk", Value: *schemas.NewSecretVar("sk-fx-test"), IsActive: bifrost.Ptr(true)}
 	governance := NewMockGovernance()
-	governance.VirtualKeys["sk-bf-test"] = vk
+	governance.VirtualKeys["sk-fx-test"] = vk
 
 	plugin, err := InitFromStore(context.Background(), nil, rules.NewMockLogger(), nil, store, governance)
 	require.NoError(t, err)
@@ -98,7 +98,7 @@ func TestPreRequestHook_MaterializesVirtualKeyRoutingAfterRules(t *testing.T) {
 		ChatRequest: &schemas.BifrostChatRequest{Provider: schemas.OpenAI, Model: "gpt-4o"},
 	}
 	ctx := schemas.NewBifrostContext(context.Background(), time.Now())
-	ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 
 	require.NoError(t, plugin.PreRequestHook(ctx, req))
 
@@ -132,9 +132,9 @@ func TestPreRequestHook_LargePayloadPublishesAllowlistBeforeRefinement(t *testin
 		Priority: 0,
 	}))
 
-	vk := &configstoreTables.TableVirtualKey{ID: "vk-1", Name: "vk", Value: *schemas.NewSecretVar("sk-bf-test"), IsActive: bifrost.Ptr(true)}
+	vk := &configstoreTables.TableVirtualKey{ID: "vk-1", Name: "vk", Value: *schemas.NewSecretVar("sk-fx-test"), IsActive: bifrost.Ptr(true)}
 	governance := NewMockGovernance()
-	governance.VirtualKeys["sk-bf-test"] = vk
+	governance.VirtualKeys["sk-fx-test"] = vk
 	// Stand in for the real load balancer picking a provider and refining the model to that
 	// provider's deployment name.
 	governance.OnLoadBalance = func(req *schemas.BifrostRequest) {
@@ -147,7 +147,7 @@ func TestPreRequestHook_LargePayloadPublishesAllowlistBeforeRefinement(t *testin
 
 	metadata := &schemas.LargePayloadMetadata{Model: "gpt-4o"}
 	ctx := schemas.NewBifrostContext(context.Background(), time.Now())
-	ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	ctx.SetValue(schemas.BifrostContextKeyLargePayloadMetadata, metadata)
 
 	req := &schemas.BifrostRequest{

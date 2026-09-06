@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-Bifrost is licensed under the [Apache License, Version 2.0](LICENSE). This file lists third-party components with license terms beyond the common MIT/BSD/Apache-2.0 permissive set — specifically, code carrying Mozilla Public License 2.0 (MPL-2.0) terms — along with third-party source code embedded directly in this repository. All components below are used unmodified and combined as a "Larger Work" per MPL-2.0 Section 3.3; no Bifrost source files are themselves MPL-licensed.
+Flare is licensed under the [Apache License, Version 2.0](LICENSE). This file lists third-party components with license terms beyond the common MIT/BSD/Apache-2.0 permissive set — specifically, code carrying Mozilla Public License 2.0 (MPL-2.0) terms — along with third-party source code embedded directly in this repository. All components below are used unmodified and combined as a "Larger Work" per MPL-2.0 Section 3.3; no Flare source files are themselves MPL-licensed.
 
 This file does not enumerate the full dependency tree (see `go.sum` / `package-lock.json` in each module for that) — only the entries that need attribution beyond what those permissive licenses require.
 
@@ -35,7 +35,7 @@ Licensed under MPL-2.0. Pulled in transitively via `vite`/`tailwindcss` as a bui
 
 ### `dompurify`
 
-Dual-licensed `MPL-2.0 OR Apache-2.0`. Bifrost elects the **Apache-2.0** option; no MPL-2.0 obligations apply to Bifrost's use of this package. Source: https://github.com/cure53/DOMPurify
+Dual-licensed `MPL-2.0 OR Apache-2.0`. Flare elects the **Apache-2.0** option; no MPL-2.0 obligations apply to Flare's use of this package. Source: https://github.com/cure53/DOMPurify
 
 ---
 

@@ -1,6 +1,6 @@
 # Provider config (Postman env files)
 
-Per-provider Postman environment `.json` files for running the Bifrost V1 API Newman e2e tests. Each file defines `base_url`, `provider`, `model`, and other model-type variables for that provider.
+Per-provider Postman environment `.json` files for running the Flare V1 API Newman e2e tests. Each file defines `base_url`, `provider`, `model`, and other model-type variables for that provider.
 
 ## Variables
 
@@ -30,17 +30,17 @@ From `tests/e2e/api`:
 ./runners/run-newman-inference-tests.sh --env provider_config/bifrost-v1-openai.postman_environment.json
 ```
 
-Ensure the Bifrost server is running and the chosen provider(s) are configured (API keys, etc.). Depending on provider capabilities, tests may either succeed (2xx) or return expected unsupported-operation responses.
+Ensure the Flare server is running and the chosen provider(s) are configured (API keys, etc.). Depending on provider capabilities, tests may either succeed (2xx) or return expected unsupported-operation responses.
 
 ## Provider-specific notes
 
-- **Cohere** – Requires a valid Cohere API key in Bifrost provider config. Key format and auth may differ from other providers; 401 is expected if the key is missing or invalid.
-- **Vertex** – Requires `region` in the key config for embeddings and other operations. Set this in Bifrost provider config (project, region, credentials). Embeddings typically require a supported region such as `us-central1`.
+- **Cohere** – Requires a valid Cohere API key in Flare provider config. Key format and auth may differ from other providers; 401 is expected if the key is missing or invalid.
+- **Vertex** – Requires `region` in the key config for embeddings and other operations. Set this in Flare provider config (project, region, credentials). Embeddings typically require a supported region such as `us-central1`.
 - **Replicate** – Set `replicate_owner` (e.g. via environment or Postman env) when running Replicate tests; otherwise API calls may fail.
 
 ## Files
 
-All Bifrost providers are included except **sgl** and **ollama** (excluded in `runners/run-newman-inference-tests.sh` when running “all providers”).
+All Flare providers are included except **sgl** and **ollama** (excluded in `runners/run-newman-inference-tests.sh` when running “all providers”).
 
 - `bifrost-v1-openai.postman_environment.json`
 - `bifrost-v1-anthropic.postman_environment.json`

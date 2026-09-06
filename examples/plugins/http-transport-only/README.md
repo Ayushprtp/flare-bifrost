@@ -4,14 +4,14 @@ This example demonstrates a plugin that only implements the `HTTPTransportPlugin
 
 ## Features
 
-- **HTTPTransportPreHook**: Intercepts HTTP requests before they enter Bifrost core
+- **HTTPTransportPreHook**: Intercepts HTTP requests before they enter Flare core
   - Authentication validation
   - Rate limiting (in-memory, per API key)
   - Request validation (size limits)
   - Custom header injection
   - Request short-circuiting for auth failures
   
-- **HTTPTransportPostHook**: Intercepts HTTP responses after Bifrost core processing
+- **HTTPTransportPostHook**: Intercepts HTTP responses after Flare core processing
   - CORS header injection
   - Security headers
   - Request duration tracking
@@ -50,7 +50,7 @@ This creates `build/http-transport-only.so`
 
 ## Configuration
 
-Add to your Bifrost config:
+Add to your Flare config:
 
 ```json
 {
@@ -122,6 +122,6 @@ Add to your Bifrost config:
 ## Notes
 
 - This plugin operates at the HTTP transport layer only
-- Works only when using bifrost-http, not when using Bifrost as a Go SDK
+- Works only when using bifrost-http, not when using Flare as a Go SDK
 - Rate limiter is in-memory (resets on restart)
 - For production, consider using Redis for distributed rate limiting

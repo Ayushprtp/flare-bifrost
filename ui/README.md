@@ -1,10 +1,10 @@
-# Bifrost UI
+# Flare UI
 
-A modern, production-ready web interface for the [Bifrost AI Gateway](https://github.com/maximhq/bifrost) - providing real-time monitoring, configuration management, and comprehensive observability for your AI infrastructure.
+A modern, production-ready web interface for the [Flare AI Gateway](https://github.com/maximhq/bifrost) - providing real-time monitoring, configuration management, and comprehensive observability for your AI infrastructure.
 
 ## Overview
 
-Bifrost UI is a React + Vite + TanStack Router web dashboard that serves as the control center for your Bifrost AI Gateway. It provides an intuitive interface to monitor AI requests, configure providers, manage MCP clients, and analyze performance metrics.
+Flare UI is a React + Vite + TanStack Router web dashboard that serves as the control center for your Flare AI Gateway. It provides an intuitive interface to monitor AI requests, configure providers, manage MCP clients, and analyze performance metrics.
 
 ### Key Features
 
@@ -20,7 +20,7 @@ Bifrost UI is a React + Vite + TanStack Router web dashboard that serves as the 
 
 ### Prerequisites
 
-The UI is designed to work with the Bifrost HTTP transport backend. Get started with the complete setup:
+The UI is designed to work with the Flare HTTP transport backend. Get started with the complete setup:
 
 **[Gateway Setup Guide →](https://docs.getbifrost.ai/quickstart/gateway/setting-up)**
 
@@ -34,12 +34,12 @@ npm install
 npm run dev
 ```
 
-The development server runs on `http://localhost:3000` and connects to your Bifrost HTTP transport backend (default: `http://localhost:8080`).
+The development server runs on `http://localhost:3000` and connects to your Flare HTTP transport backend (default: `http://localhost:8080`).
 
 ### Environment Variables
 
 ```bash
-# Development only - customize Bifrost backend port
+# Development only - customize Flare backend port
 BIFROST_PORT=8080
 ```
 
@@ -59,7 +59,7 @@ BIFROST_PORT=8080
 
 ```
 ┌─────────────────┐    HTTP/WebSocket    ┌──────────────────┐
-│   Bifrost UI    │ ◄─────────────────► │ Bifrost HTTP     │
+│   Flare UI    │ ◄─────────────────► │ Flare HTTP     │
 │   (React+Vite)  │                     │ Transport (Go)   │
 └─────────────────┘                     └──────────────────┘
         │                                        │
@@ -93,7 +93,7 @@ Model Context Protocol integration for advanced AI capabilities including tool i
 
 ### Plugin Ecosystem
 
-Extend Bifrost with powerful plugins for observability, testing, caching, and custom functionality.
+Extend Flare with powerful plugins for observability, testing, caching, and custom functionality.
 
 **Available Plugins:**
 
@@ -129,7 +129,7 @@ ui/
 
 ### API Integration
 
-The UI uses Redux Toolkit + RTK Query for state management and API communication with the Bifrost HTTP transport backend:
+The UI uses Redux Toolkit + RTK Query for state management and API communication with the Flare HTTP transport backend:
 
 ```typescript
 // Example API usage with RTK Query

@@ -1,6 +1,6 @@
 # MCP Library - Community Catalog
 
-This directory contains the community-curated catalog of [MCP (Model Context Protocol)](https://modelcontextprotocol.io) servers available in the Bifrost MCP Library.
+This directory contains the community-curated catalog of [MCP (Model Context Protocol)](https://modelcontextprotocol.io) servers available in the Flare MCP Library.
 
 Anyone can add an MCP server by editing [`servers.json`](./servers.json) and opening a pull request.
 
@@ -17,7 +17,7 @@ cd bifrost
 
 Add one entry to the `servers` array in `community/mcp-library/servers.json`. Use the field reference below and copy the shape of nearby entries.
 
-Bifrost generates the internal server slug from `name`. Do not add a `slug` field to catalog entries.
+Flare generates the internal server slug from `name`. Do not add a `slug` field to catalog entries.
 
 ### 3. Check your change locally
 
@@ -84,7 +84,7 @@ Each server entry is a JSON object in the `servers` array.
 
 | Field | Type | Required | Description |
 | ----- | ---- | -------- | ----------- |
-| `name` | `string` | yes | Human-readable display name. Bifrost derives the internal slug from this value. |
+| `name` | `string` | yes | Human-readable display name. Flare derives the internal slug from this value. |
 | `description` | `string` | no | Short summary of what the server does. |
 | `category` | `string` | no | Grouping category used for filtering. Reuse an existing category when possible. |
 | `connection_type` | `string` | yes | One of `http`, `stdio`, `sse`, or `inprocess`. |
@@ -111,7 +111,7 @@ Each server entry is a JSON object in the `servers` array.
 ### Do
 
 - Add one server per pull request.
-- Use a clear, stable `name`; changing it later changes Bifrost's generated internal slug.
+- Use a clear, stable `name`; changing it later changes Flare's generated internal slug.
 - Write a concise, factual `description`.
 - Include a `docs_url` so users can verify setup and requirements.
 - Use `required_header_keys` and `stdio_config.envs` for key names only, never values.
@@ -161,8 +161,8 @@ Maintainers may ask for changes or reject entries that are incomplete, unsafe, d
 
 1. You submit a PR adding your server to `servers.json`.
 2. Maintainers review and merge it into the `dev` branch.
-3. The Bifrost platform periodically fetches `servers.json` from the `dev` branch.
-4. Bifrost derives an internal slug from `name`, upserts entries by that slug, and serves the catalog to users.
+3. The Flare platform periodically fetches `servers.json` from the `dev` branch.
+4. Flare derives an internal slug from `name`, upserts entries by that slug, and serves the catalog to users.
 
 Changing the `name` of an existing entry can create a new internal slug. Only rename an existing server when that is intentional.
 
@@ -173,4 +173,4 @@ The [`schema.json`](./schema.json) file contains a [JSON Schema draft-07](https:
 ## Questions?
 
 - Open an [issue](https://github.com/maximhq/bifrost/issues/new) for questions or problems.
-- See the [Bifrost docs](https://docs.getbifrost.ai) for general platform documentation.
+- See the [Flare docs](https://docs.getbifrost.ai) for general platform documentation.

@@ -8,7 +8,7 @@ import (
 // realtimeAuthRefusalMessage is what an anonymous realtime caller is told. It names the two
 // credentials that work, because the realtime flow has a second one (the ephemeral client
 // secret) that the generic inference message does not mention.
-const realtimeAuthRefusalMessage = "authentication is required for realtime connections. Provide a virtual key (x-bf-vk or an sk-bf- bearer token), or an ephemeral client secret minted by POST /v1/realtime/client_secrets."
+const realtimeAuthRefusalMessage = "authentication is required for realtime connections. Provide a virtual key (x-bf-vk or an sk-fx- bearer token), or an ephemeral client secret minted by POST /v1/realtime/client_secrets."
 
 // refuseUnauthenticatedRealtime reports whether a realtime connection must be refused before it
 // is established, and is the admission gate for every realtime transport (WebSocket upgrade and

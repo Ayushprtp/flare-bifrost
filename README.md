@@ -1,4 +1,4 @@
-# Bifrost AI Gateway
+# Flare AI Gateway
 
 <a href="https://trendshift.io/repositories/14529?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-14529" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/14529" alt="maximhq%2Fbifrost | Trendshift" width="250" height="55"/></a>
 
@@ -11,7 +11,7 @@
 
 ## The fastest way to build AI applications that never go down
 
-Bifrost is a high-performance AI gateway that unifies access to 23+ providers (OpenAI, Anthropic, AWS Bedrock, Google Vertex, and more) through a single OpenAI-compatible API. Deploy in seconds with zero configuration and get automatic failover, load balancing, semantic caching, and enterprise-grade features.
+Flare is a high-performance AI gateway that unifies access to 23+ providers (OpenAI, Anthropic, AWS Bedrock, Google Vertex, and more) through a single OpenAI-compatible API. Deploy in seconds with zero configuration and get automatic failover, load balancing, semantic caching, and enterprise-grade features.
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ Bifrost is a high-performance AI gateway that unifies access to 23+ providers (O
 
 **Go from zero to production-ready AI gateway in under a minute.**
 
-**Step 1:** Start Bifrost Gateway
+**Step 1:** Start Flare Gateway
 
 ```bash
 # Install and run locally
@@ -43,7 +43,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "openai/gpt-4o-mini",
-    "messages": [{"role": "user", "content": "Hello, Bifrost!"}]
+    "messages": [{"role": "user", "content": "Hello, Flare!"}]
   }'
 ```
 
@@ -58,7 +58,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ## Enterprise Deployments
 
-Bifrost supports enterprise-grade, private deployments for teams running production AI systems at scale.
+Flare supports enterprise-grade, private deployments for teams running production AI systems at scale.
 In addition to private networking, custom security controls, and governance, enterprise deployments unlock advanced capabilities including adaptive load balancing, clustering, guardrails, MCP gateway, and other features designed for enterprise-grade scale and reliability.
 
 <img src=".github/assets/features.png" alt="Book a Demo" width="100%" style="margin-top:5px;"/>
@@ -110,15 +110,15 @@ In addition to private networking, custom security controls, and governance, ent
 
 ## Repository Structure
 
-Bifrost uses a modular architecture for maximum flexibility:
+Flare uses a modular architecture for maximum flexibility:
 
 ```text
 bifrost/
 ├── npx/                 # NPX script for easy installation
 ├── core/                # Core functionality and shared components
 │   ├── providers/       # Provider-specific implementations (OpenAI, Anthropic, etc.)
-│   ├── schemas/         # Interfaces and structs used throughout Bifrost
-│   └── bifrost.go       # Main Bifrost implementation
+│   ├── schemas/         # Interfaces and structs used throughout Flare
+│   └── bifrost.go       # Main Flare implementation
 ├── framework/           # Framework components for data persistence
 │   ├── configstore/     # Configuration storage backends
 │   ├── logstore/        # Request logging storage backends
@@ -196,11 +196,11 @@ go get github.com/maximhq/bifrost/core
 
 ## Performance
 
-Bifrost adds virtually zero overhead to your AI requests. In sustained 5,000 RPS benchmarks, the gateway added only **11 µs** of overhead per request.
+Flare adds virtually zero overhead to your AI requests. In sustained 5,000 RPS benchmarks, the gateway added only **11 µs** of overhead per request.
 
 | Metric | t3.medium | t3.xlarge | Improvement |
 |--------|-----------|-----------|-------------|
-| Added latency (Bifrost overhead) | 59 µs | **11 µs** | **-81%** |
+| Added latency (Flare overhead) | 59 µs | **11 µs** | **-81%** |
 | Success rate @ 5k RPS | 100% | 100% | No failed requests |
 | Avg. queue wait time | 47 µs | **1.67 µs** | **-96%** |
 | Avg. request latency (incl. provider) | 2.12 s | **1.61 s** | **-24%** |

@@ -757,7 +757,7 @@ type listedModel struct {
 //   - limit: Maximum number of results to return (default: 5)
 //
 // Request headers:
-//   - x-bf-vk / Authorization: Bearer / x-api-key / x-goog-api-key: Virtual key (sk-bf-…) to scope
+//   - x-bf-vk / Authorization: Bearer / x-api-key / x-goog-api-key: Virtual key (sk-fx-…) to scope
 //     results to providers and models allowed by that virtual key.
 func (h *ProviderHandler) listModels(ctx *fasthttp.RequestCtx) {
 	bifrostCtx, cancel := lib.ConvertToBifrostContext(ctx, h.inMemoryStore)
@@ -808,7 +808,7 @@ func (h *ProviderHandler) listModels(ctx *fasthttp.RequestCtx) {
 //   - offset: Number of results to skip (for pagination)
 //
 // Request headers:
-//   - x-bf-vk / Authorization: Bearer / x-api-key / x-goog-api-key: Virtual key (sk-bf-…) to scope
+//   - x-bf-vk / Authorization: Bearer / x-api-key / x-goog-api-key: Virtual key (sk-fx-…) to scope
 //     results to providers and models allowed by that virtual key.
 func (h *ProviderHandler) listModelDetails(ctx *fasthttp.RequestCtx) {
 	bifrostCtx, cancel := lib.ConvertToBifrostContext(ctx, h.inMemoryStore)

@@ -1,6 +1,6 @@
 # Hello World WASM Plugin
 
-A minimal example of a Bifrost plugin written in Go and compiled to WebAssembly using TinyGo.
+A minimal example of a Flare plugin written in Go and compiled to WebAssembly using TinyGo.
 
 ## Prerequisites
 
@@ -96,7 +96,7 @@ To short-circuit, return a response:
 
 **PreLLMHook Input:**
 - `ctx`: `{"request_id": "..."}` (context info)
-- `req`: Bifrost request JSON
+- `req`: Flare request JSON
 
 **PreLLMHook Output:**
 ```json
@@ -109,8 +109,8 @@ To short-circuit, return a response:
 
 **PostLLMHook Input:**
 - `ctx`: Context JSON
-- `resp`: Bifrost response JSON
-- `err`: Bifrost error JSON (or null)
+- `resp`: Flare response JSON
+- `err`: Flare error JSON (or null)
 
 **PostLLMHook Output:**
 ```json
@@ -121,9 +121,9 @@ To short-circuit, return a response:
 }
 ```
 
-## Usage with Bifrost
+## Usage with Flare
 
-Configure the plugin in your Bifrost config:
+Configure the plugin in your Flare config:
 
 ```json
 {

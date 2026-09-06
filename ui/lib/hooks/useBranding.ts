@@ -5,10 +5,10 @@ import { useEffect } from "react";
 
 /** Bundled Bifrost assets. These are the OSS values and the fallback for every
  * slot an enterprise deployment has not overridden. */
-const DEFAULT_LOGO_LIGHT = "/bifrost-logo.webp";
-const DEFAULT_LOGO_DARK = "/bifrost-logo-dark.webp";
-const DEFAULT_ICON_LIGHT = "/bifrost-icon.webp";
-const DEFAULT_ICON_DARK = "/bifrost-icon-dark.webp";
+const DEFAULT_LOGO_LIGHT = "/flare-logo.webp";
+const DEFAULT_LOGO_DARK = "/flare-logo-dark.webp";
+const DEFAULT_ICON_LIGHT = "/flare-icon.webp";
+const DEFAULT_ICON_DARK = "/flare-icon-dark.webp";
 
 /**
  * Resolves a branding asset URL returned by the API against the current API
@@ -36,7 +36,7 @@ export function resolveBrandingAssetUrl(url: string | undefined): string {
  * shows a broken image for the one frame before the in-flight response replaces
  * it. Acceptable against a guaranteed wrong-logo flash on every load.
  */
-const CACHE_KEY = "bifrost-branding";
+const CACHE_KEY = "flare-branding";
 
 /** Read once per page load and kept in sync from the query below, so every
  * consumer of the hook agrees and repeat renders don't re-parse the entry. */
@@ -109,7 +109,7 @@ export interface BrandingAssets {
 	/** Square mark for the collapsed sidebar. */
 	iconSrc: string;
 	/** True when a custom logo or icon is in use. Surfaces that hardcode
-	 * "Bifrost" as alt text or a product name should fall back to a neutral
+	 * "Flare" as alt text or a product name should fall back to a neutral
 	 * label when this is set. */
 	isCustom: boolean;
 	/** Alt text: the customer's logo is not the Bifrost logo, and labelling it
@@ -139,7 +139,7 @@ function toBrandingAssets(branding: BrandingState | undefined, isDark: boolean):
 		logoSrc: hasLogo ? resolveBrandingAssetUrl(branding!.logo_url) : isDark ? DEFAULT_LOGO_DARK : DEFAULT_LOGO_LIGHT,
 		iconSrc: hasIcon ? resolveBrandingAssetUrl(branding!.icon_url) : isDark ? DEFAULT_ICON_DARK : DEFAULT_ICON_LIGHT,
 		isCustom: Boolean(branding?.enabled),
-		logoAlt: branding?.enabled ? "" : "Bifrost",
+		logoAlt: branding?.enabled ? "" : "Flare",
 	};
 }
 

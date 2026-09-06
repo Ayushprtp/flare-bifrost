@@ -22,7 +22,7 @@ func clientHeaders() map[string][]string {
 		"accept-encoding":   {"gzip, deflate, br"},
 		"x-app":             {"cli"},
 		"x-stainless-lang":  {"js"},
-		"x-bf-vk":           {"sk-bf-must-never-leave-the-gateway"},
+		"x-bf-vk":           {"sk-fx-must-never-leave-the-gateway"},
 		"x-forwarded-for":   {"10.30.10.147"},
 		"connection":        {"keep-alive"},
 	}

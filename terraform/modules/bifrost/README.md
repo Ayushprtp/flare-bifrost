@@ -1,6 +1,6 @@
-# Bifrost Terraform Module
+# Flare Terraform Module
 
-Single entry point for deploying [Bifrost](https://github.com/maximhq/bifrost) on AWS, GCP, Azure, or any Kubernetes cluster. This module handles configuration merging, image resolution, and routes to the appropriate cloud-provider sub-module based on your `cloud_provider` and `service` selections.
+Single entry point for deploying [Flare](https://github.com/maximhq/bifrost) on AWS, GCP, Azure, or any Kubernetes cluster. This module handles configuration merging, image resolution, and routes to the appropriate cloud-provider sub-module based on your `cloud_provider` and `service` selections.
 
 ## Usage
 
@@ -102,7 +102,7 @@ Invalid combinations (e.g. `cloud_provider = "aws"` with `service = "gke"`) are 
 
 ## Configuration Merging
 
-The module supports three ways to provide Bifrost configuration, which are merged in order of precedence:
+The module supports three ways to provide Flare configuration, which are merged in order of precedence:
 
 1. **Base config file** (`config_json_file`) -- path to a `config.json` file on disk.
 2. **Base config string** (`config_json`) -- complete JSON config as a string (used if no file is provided).
@@ -114,7 +114,7 @@ Set `schema_url` to write a mirrored schema location into `$schema` for isolated
 
 ### Configurable Sections
 
-All 18 top-level properties from the [Bifrost config schema](../../../transports/config.schema.json) are exposed as Terraform variables:
+All 18 top-level properties from the [Flare config schema](../../../transports/config.schema.json) are exposed as Terraform variables:
 
 | Variable             | Schema Key           | Description                                    |
 |----------------------|----------------------|------------------------------------------------|
@@ -142,7 +142,7 @@ For `scim_config` with `provider = "okta"`, set `config.issuerUrl`, `config.clie
 
 | Output             | Description                                     |
 |--------------------|--------------------------------------------------|
-| `service_url`      | URL to access the deployed Bifrost service       |
+| `service_url`      | URL to access the deployed Flare service       |
 | `health_check_url` | URL to the `/health` endpoint                    |
 | `config_json`      | Resolved configuration JSON (sensitive, for debugging) |
 

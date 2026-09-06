@@ -1,12 +1,12 @@
-# Bifrost behind NGINX (Docker Compose)
+# Flare behind NGINX (Docker Compose)
 
-This example runs 3 Bifrost containers behind an NGINX reverse proxy.
+This example runs 3 Flare containers behind an NGINX reverse proxy.
 
 ## Files
 
-- `docker-compose.yml` - Starts NGINX and 3 Bifrost nodes
+- `docker-compose.yml` - Starts NGINX and 3 Flare nodes
 - `nginx.conf` - Reverse proxy and load balancing config
-- `config.json` - Shared Bifrost config for all nodes
+- `config.json` - Shared Flare config for all nodes
 - `.env.example` - Required environment variables
 - `helm-values.yaml` - Helm values for Kubernetes + NGINX Ingress
 - `k8s-ingress.yaml` - Standalone ingress manifest (non-Helm or override)
@@ -23,7 +23,7 @@ docker compose up -d
 docker compose ps
 ```
 
-NGINX exposes Bifrost on `http://localhost:8080`.
+NGINX exposes Flare on `http://localhost:8080`.
 
 ## Verify
 

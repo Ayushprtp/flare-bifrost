@@ -1,6 +1,6 @@
 # E2E API tests (Newman / Postman)
 
-End-to-end API tests for the Bifrost API using Postman collections and [Newman](https://www.npmjs.com/package/newman) (CLI).
+End-to-end API tests for the Flare API using Postman collections and [Newman](https://www.npmjs.com/package/newman) (CLI).
 
 ## Contents
 
@@ -49,7 +49,7 @@ End-to-end API tests for the Bifrost API using Postman collections and [Newman](
 ## Prerequisites
 
 - [Newman](https://www.npmjs.com/package/newman): `npm install -g newman`
-- Bifrost server running (e.g. `http://localhost:8080`) with at least one provider configured (API keys, etc.)
+- Flare server running (e.g. `http://localhost:8080`) with at least one provider configured (API keys, etc.)
 
 ## Test infrastructure setup
 
@@ -106,7 +106,7 @@ pillars, each with an `intent` saying what it buys:
 
 | Pillar | Picks | Covers |
 |---|---:|---|
-| `cache-parity` | 32 | Round 34 direct-vs-Bifrost cache anchor, Round 35 cross-provider matrix, content-block `cache_control` / `cachePoint`, OpenRouter pass-through |
+| `cache-parity` | 32 | Round 34 direct-vs-Flare cache anchor, Round 35 cross-provider matrix, content-block `cache_control` / `cachePoint`, OpenRouter pass-through |
 | `reasoning-tools-interleave` | 24 | Folder 46's three-turn reasoning × tool-call chains, plus chat→responses tool replay |
 | `reasoning` | 19 | Redacted thinking, encrypted reasoning item-id round-trips, thought-signature replay, fail-soft |
 | `cross-cut-baseline` | 16 | One cell per endpoint shape and modality, including the azure and passthrough forks |
@@ -252,7 +252,7 @@ Run locally (from this directory):
 
 Requirements:
 
-- Bifrost running at `{{base_url}}` (default `http://localhost:8080`), ideally
+- Flare running at `{{base_url}}` (default `http://localhost:8080`), ideally
   against a clean config store so no pre-existing `catwiring-*` providers linger.
 - `openai_api_key` available — either in the seed env file (`generated/seed.env`
   or `$BIFROST_E2E_SEED_ENV`) or exported in the shell. Scenarios whose required
@@ -373,7 +373,7 @@ Some failures are expected and do not indicate bugs:
 
 - **Batch API config (500)** – **"no batch-enabled keys found"** / **"no config found for batch APIs"** when batch endpoints are not configured for that provider.
 
-  **To fix:** In Bifrost's config (or provider config), enable "Use for Batch APIs" on at least one API key for the provider, e.g. in config JSON:
+  **To fix:** In Flare's config (or provider config), enable "Use for Batch APIs" on at least one API key for the provider, e.g. in config JSON:
   ```json
   {
     "providers": [
@@ -483,14 +483,14 @@ submit -> poll to terminal -> wait for the settlement row -> assert the billed c
 ```
 
 The expected figures in `fixtures/video-costing-cases.json` are the providers' **own published
-rates**, so a red case means Bifrost disagrees with a price list.
+rates**, so a red case means Flare disagrees with a price list.
 
 | Path | Description |
 |------|-------------|
 | `fixtures/video-costing-cases.json` | One case per line of the video-costing checklist: request body, expected dimensions, expected rate. |
 | `runners/run-video-costing.mjs` | The runner: submit, poll, wait for settlement, assert, report. |
 | `runners/lib/video-costing.mjs` | Pure verdict logic — band resolution, expected cost, which row is the cost row. |
-| `runners/lib/video-costing.test.mjs` | Unit tests for the above. No network, no Bifrost, no credentials. Runs under `make test-harness-runner-lib`. |
+| `runners/lib/video-costing.test.mjs` | Unit tests for the above. No network, no Flare, no credentials. Runs under `make test-harness-runner-lib`. |
 
 ### Running
 
@@ -498,10 +498,10 @@ rates**, so a red case means Bifrost disagrees with a price list.
 # What each case covers. No network.
 make list-video-costing-cases
 
-# Everything, against a local Bifrost.
+# Everything, against a local Flare.
 make run-video-costing-test
 
-# One provider group, against hosted Bifrost with a virtual key.
+# One provider group, against hosted Flare with a virtual key.
 make run-video-costing-test ARGS="--group Runware --base-url https://<host> --vk sk-bf-..."
 
 # Print what would run without spending money on generations.
@@ -514,7 +514,7 @@ Exit code is 1 if any case fails, so it drops into CI unchanged once the rates a
 
 | Flag | Meaning |
 |------|---------|
-| `--base-url` | Target Bifrost. Defaults to `http://localhost:8080`. |
+| `--base-url` | Target Flare. Defaults to `http://localhost:8080`. |
 | `--vk` | Virtual key for the inference calls. Required against hosted. |
 | `--api-key` | Management API key, sent as `x-bf-api-key`, for reading `/api/logs`. |
 | `--header "X-Foo: bar"` | Extra headers on every call; comma-separate for several. |
@@ -529,9 +529,9 @@ Exit code is 1 if any case fails, so it drops into CI unchanged once the rates a
 ### Why `--seed-pricing` exists
 
 The resolution-band pricing keys (`output_cost_per_video_per_second_{480p,720p,1024p,1080p,4k}`) are
-wired in Bifrost but **not yet published to the upstream datasheet feed**. Without a rate, every
+wired in Flare but **not yet published to the upstream datasheet feed**. Without a rate, every
 banded case settles *unpriceable* (cost `NULL`) and proves nothing. `--seed-pricing` writes each
-case's own expected rate as a global pricing override first, so the run measures Bifrost's band
+case's own expected rate as a global pricing override first, so the run measures Flare's band
 selection and arithmetic rather than the feed's contents. Drop the flag once the feed publishes them.
 
 ### Cases marked `needs_rate`
@@ -572,7 +572,7 @@ Two are worth calling out:
 - **`runway-retrieve-404-stops-polling`** asserts on *latency*, not just the status code — an
   internally retried 404 blows through the `expect_fast_ms` ceiling.
 - **`runway-seedance25-input-seconds`** is expected to fail on price even once its rate is filled in.
-  Runway bills seedance for input seconds *plus* output seconds and Bifrost has an output-only
+  Runway bills seedance for input seconds *plus* output seconds and Flare has an output-only
   per-second model, so video-to-video under-bills. Run it to measure the gap.
 - **`expect_job_params`** (the Gemini cases) needs `--config-db-url`; without it those checks report
-  as skipped rather than failing, so every other check still works against hosted Bifrost.
+  as skipped rather than failing, so every other check still works against hosted Flare.

@@ -8892,12 +8892,12 @@ func vkSyncTestSetup(t *testing.T, dbVK tables.TableVirtualKey, fileVK tables.Ta
 // value differing from both the active and previous values is treated as an
 // explicit rotation - active becomes previous with a grace expiry.
 func TestMergeGovernanceConfig_FileValueDiffers_RotatesWithGrace(t *testing.T) {
-	dbVK := tables.TableVirtualKey{ID: "vk-1", Name: "rotating-vk", Value: *schemas.NewSecretVar("sk-bf-active")}
+	dbVK := tables.TableVirtualKey{ID: "vk-1", Name: "rotating-vk", Value: *schemas.NewSecretVar("sk-fx-active")}
 	oldHash, err := configstore.GenerateVirtualKeyHash(dbVK)
 	require.NoError(t, err)
 	dbVK.ConfigHash = oldHash
 
-	fileVK := tables.TableVirtualKey{ID: "vk-1", Name: "rotating-vk", Value: *schemas.NewSecretVar("sk-bf-from-file")}
+	fileVK := tables.TableVirtualKey{ID: "vk-1", Name: "rotating-vk", Value: *schemas.NewSecretVar("sk-fx-from-file")}
 	fileHash, err := configstore.GenerateVirtualKeyHash(fileVK)
 	require.NoError(t, err)
 
@@ -8905,38 +8905,38 @@ func TestMergeGovernanceConfig_FileValueDiffers_RotatesWithGrace(t *testing.T) {
 	mergeGovernanceConfig(context.Background(), config, configData, dbGovernance)
 
 	merged := dbGovernance.VirtualKeys[0]
-	require.Equal(t, "sk-bf-from-file", merged.Value.GetValue(), "config.json value must become active")
-	require.Equal(t, "sk-bf-active", merged.PreviousValue.GetValue(), "old active value must move to previous")
+	require.Equal(t, "sk-fx-from-file", merged.Value.GetValue(), "config.json value must become active")
+	require.Equal(t, "sk-fx-active", merged.PreviousValue.GetValue(), "old active value must move to previous")
 	require.NotNil(t, merged.RotatedAt)
 	require.NotNil(t, merged.PreviousValueExpiresAt)
 	require.Equal(t, fileHash, merged.ConfigHash, "ConfigHash must be the file-derived hash")
 
 	// Second boot with the same file: hash matches, nothing re-syncs.
 	configData2 := &ConfigData{
-		Governance: &configstore.GovernanceConfig{VirtualKeys: []tables.TableVirtualKey{{ID: "vk-1", Name: "rotating-vk", Value: *schemas.NewSecretVar("sk-bf-from-file")}}},
+		Governance: &configstore.GovernanceConfig{VirtualKeys: []tables.TableVirtualKey{{ID: "vk-1", Name: "rotating-vk", Value: *schemas.NewSecretVar("sk-fx-from-file")}}},
 	}
 	firstRotatedAt := merged.RotatedAt
 	mergeGovernanceConfig(context.Background(), config, configData2, dbGovernance)
 	again := dbGovernance.VirtualKeys[0]
-	require.Equal(t, "sk-bf-from-file", again.Value.GetValue())
+	require.Equal(t, "sk-fx-from-file", again.Value.GetValue())
 	require.Equal(t, firstRotatedAt, again.RotatedAt, "second boot must not re-rotate")
 }
 
 // TestMergeGovernanceConfig_FileValueDiffers_ZeroCooldownFlipsImmediately: with
 // no cooldown configured the rotation still happens but no grace state is kept.
 func TestMergeGovernanceConfig_FileValueDiffers_ZeroCooldownFlipsImmediately(t *testing.T) {
-	dbVK := tables.TableVirtualKey{ID: "vk-1", Name: "flip-vk", Value: *schemas.NewSecretVar("sk-bf-active")}
+	dbVK := tables.TableVirtualKey{ID: "vk-1", Name: "flip-vk", Value: *schemas.NewSecretVar("sk-fx-active")}
 	oldHash, err := configstore.GenerateVirtualKeyHash(dbVK)
 	require.NoError(t, err)
 	dbVK.ConfigHash = oldHash
 
-	fileVK := tables.TableVirtualKey{ID: "vk-1", Name: "flip-vk", Value: *schemas.NewSecretVar("sk-bf-from-file")}
+	fileVK := tables.TableVirtualKey{ID: "vk-1", Name: "flip-vk", Value: *schemas.NewSecretVar("sk-fx-from-file")}
 
 	config, configData, dbGovernance := vkSyncTestSetup(t, dbVK, fileVK, 0)
 	mergeGovernanceConfig(context.Background(), config, configData, dbGovernance)
 
 	merged := dbGovernance.VirtualKeys[0]
-	require.Equal(t, "sk-bf-from-file", merged.Value.GetValue())
+	require.Equal(t, "sk-fx-from-file", merged.Value.GetValue())
 	require.False(t, merged.PreviousValue.IsSet(), "no grace state at zero cooldown")
 	require.Nil(t, merged.PreviousValueExpiresAt)
 	require.NotNil(t, merged.RotatedAt)
@@ -8953,21 +8953,21 @@ func TestMergeGovernanceConfig_FileMatchesPreviousValue_NoChange(t *testing.T) {
 		ID:                     "vk-1",
 		Name:                   "rotated-vk",
 		Description:            "old description",
-		Value:                  *schemas.NewSecretVar("sk-bf-active"),
-		PreviousValue:          *schemas.NewSecretVar("sk-bf-rotated-out"),
-		PreviousValueHash:      encrypt.HashSHA256("sk-bf-rotated-out"),
+		Value:                  *schemas.NewSecretVar("sk-fx-active"),
+		PreviousValue:          *schemas.NewSecretVar("sk-fx-rotated-out"),
+		PreviousValueHash:      encrypt.HashSHA256("sk-fx-rotated-out"),
 		PreviousValueExpiresAt: &graceExpiry,
 		RotatedAt:              &rotatedAt,
 	}
 	// The DB row was last synced when the file held the pre-rotation value.
-	oldFileState := tables.TableVirtualKey{ID: "vk-1", Name: "rotated-vk", Description: "old description", Value: *schemas.NewSecretVar("sk-bf-rotated-out")}
+	oldFileState := tables.TableVirtualKey{ID: "vk-1", Name: "rotated-vk", Description: "old description", Value: *schemas.NewSecretVar("sk-fx-rotated-out")}
 	oldHash, err := configstore.GenerateVirtualKeyHash(oldFileState)
 	require.NoError(t, err)
 	dbVK.ConfigHash = oldHash
 
 	// The file still holds the pre-rotation value but changes another field, so
 	// the update branch is entered.
-	fileVK := tables.TableVirtualKey{ID: "vk-1", Name: "rotated-vk", Description: "new description", Value: *schemas.NewSecretVar("sk-bf-rotated-out")}
+	fileVK := tables.TableVirtualKey{ID: "vk-1", Name: "rotated-vk", Description: "new description", Value: *schemas.NewSecretVar("sk-fx-rotated-out")}
 	fileHash, err := configstore.GenerateVirtualKeyHash(fileVK)
 	require.NoError(t, err)
 
@@ -8975,19 +8975,19 @@ func TestMergeGovernanceConfig_FileMatchesPreviousValue_NoChange(t *testing.T) {
 	mergeGovernanceConfig(context.Background(), config, configData, dbGovernance)
 
 	merged := dbGovernance.VirtualKeys[0]
-	require.Equal(t, "sk-bf-active", merged.Value.GetValue(), "active value must be kept when the file holds the previous value")
+	require.Equal(t, "sk-fx-active", merged.Value.GetValue(), "active value must be kept when the file holds the previous value")
 	require.Equal(t, "new description", merged.Description, "non-value fields must still sync")
 	require.Equal(t, fileHash, merged.ConfigHash, "ConfigHash must be the file-derived hash so the next boot no-ops")
-	require.Equal(t, "sk-bf-rotated-out", merged.PreviousValue.GetValue(), "in-flight grace state must be carried over")
+	require.Equal(t, "sk-fx-rotated-out", merged.PreviousValue.GetValue(), "in-flight grace state must be carried over")
 	require.NotNil(t, merged.PreviousValueExpiresAt)
 	require.Equal(t, &rotatedAt, merged.RotatedAt)
 
 	// Second boot with the same file: hash matches, value untouched.
 	configData2 := &ConfigData{
-		Governance: &configstore.GovernanceConfig{VirtualKeys: []tables.TableVirtualKey{{ID: "vk-1", Name: "rotated-vk", Description: "new description", Value: *schemas.NewSecretVar("sk-bf-rotated-out")}}},
+		Governance: &configstore.GovernanceConfig{VirtualKeys: []tables.TableVirtualKey{{ID: "vk-1", Name: "rotated-vk", Description: "new description", Value: *schemas.NewSecretVar("sk-fx-rotated-out")}}},
 	}
 	mergeGovernanceConfig(context.Background(), config, configData2, dbGovernance)
-	require.Equal(t, "sk-bf-active", dbGovernance.VirtualKeys[0].Value.GetValue())
+	require.Equal(t, "sk-fx-active", dbGovernance.VirtualKeys[0].Value.GetValue())
 }
 
 // TestVirtualKeyHashComparison_VirtualKeyOnlyInDB tests that dashboard-added VK is preserved
@@ -13349,7 +13349,7 @@ func TestLoadConfig_Governance_FirstImportUsesMergeIDHandling(t *testing.T) {
 			{Name: "Generated Team"},
 		},
 		VirtualKeys: []tables.TableVirtualKey{
-			{ID: "vk-explicit", Name: "Explicit VK", Value: *schemas.NewSecretVar("sk-bf-explicit")},
+			{ID: "vk-explicit", Name: "Explicit VK", Value: *schemas.NewSecretVar("sk-fx-explicit")},
 			{Name: "Generated VK"},
 		},
 		ComplexityAnalyzerConfig: testFileComplexityAnalyzerConfig(),
@@ -13408,11 +13408,11 @@ func TestLoadConfig_Governance_FirstImportUsesMergeIDHandling(t *testing.T) {
 	}
 	require.NotNil(t, explicitVK)
 	require.Equal(t, "vk-explicit", explicitVK.ID)
-	require.Equal(t, "sk-bf-explicit", explicitVK.Value.GetValue())
+	require.Equal(t, "sk-fx-explicit", explicitVK.Value.GetValue())
 	require.NotNil(t, generatedVK)
 	_, err = uuid.Parse(generatedVK.ID)
 	require.NoError(t, err)
-	require.True(t, strings.HasPrefix(generatedVK.Value.GetValue(), "sk-bf-"))
+	require.True(t, strings.HasPrefix(generatedVK.Value.GetValue(), "sk-fx-"))
 	require.NotNil(t, config.GovernanceConfig.ComplexityAnalyzerConfig)
 	require.NotNil(t, govConfig.ComplexityAnalyzerConfig)
 	require.Equal(t, govConfig.ComplexityAnalyzerConfig, config.GovernanceConfig.ComplexityAnalyzerConfig)

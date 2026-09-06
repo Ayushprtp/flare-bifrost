@@ -383,12 +383,12 @@ func TestVirtualKeyReloadDoesNotResurrectOverrideCycles(t *testing.T) {
 
 	budget := newCycleTestBudget("vk-reload-budget", 100, 0)
 	require.NoError(t, budget.SetOverride(25, configstoreTables.BudgetOverrideModeCycles, 3))
-	vk := buildVirtualKeyWithMultiBudgets("vk-reload", "sk-bf-vk-reload", "VK Reload", []configstoreTables.TableBudget{*budget})
+	vk := buildVirtualKeyWithMultiBudgets("vk-reload", "sk-fx-vk-reload", "VK Reload", []configstoreTables.TableBudget{*budget})
 	store.CreateVirtualKeyInMemory(ctx, vk)
 
 	// The snapshot a reload carries: the row as the database holds it before the
 	// leader has flushed the spent cycle.
-	pristine := buildVirtualKeyWithMultiBudgets(vk.ID, "sk-bf-vk-reload", vk.Name, []configstoreTables.TableBudget{*budget})
+	pristine := buildVirtualKeyWithMultiBudgets(vk.ID, "sk-fx-vk-reload", vk.Name, []configstoreTables.TableBudget{*budget})
 
 	reset := sweepBudgetAt(t, store, budget.ID, anchor.Add(61*time.Second))
 	require.NotNil(t, reset, "budget should be due one window after the anchor")

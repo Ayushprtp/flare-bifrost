@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const mcpTestVKValue = "sk-bf-mcp-test"
+const mcpTestVKValue = "sk-fx-mcp-test"
 
 // buildVKForMCPStamping returns an active VK with an openai provider config (so load
 // balancing has a provider pool) and an explicit sentry MCP config granting the given
@@ -463,7 +463,7 @@ func TestPreMCPHookGatesTheToolOnAccess(t *testing.T) {
 		// Not by a second read of the credential: that would answer a question the grant already settled,
 		// from a source that could disagree with it.
 		plugin := newAccessTestPlugin(t, vk, nil)
-		ctx := presentCtx("sk-bf-revoked")
+		ctx := presentCtx("sk-fx-revoked")
 
 		_, shortCircuit, err := plugin.PreMCPHook(ctx, mcpToolCall("sentry-read_file"))
 

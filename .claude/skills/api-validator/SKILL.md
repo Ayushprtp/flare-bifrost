@@ -1,12 +1,12 @@
 ---
 name: api-validator
-description: Scan Bifrost HTTP controllers/handlers/integrations and validate OpenAPI API coverage, route methods/paths, parameters, request/response docs, and auth/security information. Use when asked to audit missing or incorrect APIs, compare controllers against docs/openapi, validate auth information, or fix API documentation drift. Invoked with /api-validator [scope] [--fix].
+description: Scan Flare HTTP controllers/handlers/integrations and validate OpenAPI API coverage, route methods/paths, parameters, request/response docs, and auth/security information. Use when asked to audit missing or incorrect APIs, compare controllers against docs/openapi, validate auth information, or fix API documentation drift. Invoked with /api-validator [scope] [--fix].
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task, AskUserQuestion, TodoWrite
 ---
 
 # API Validator
 
-Audit Bifrost's HTTP API surface by scanning controller/handler route registrations, deriving the actual authentication behavior from middleware wiring, and comparing the result with `docs/openapi/openapi.yaml` and referenced OpenAPI path files.
+Audit Flare's HTTP API surface by scanning controller/handler route registrations, deriving the actual authentication behavior from middleware wiring, and comparing the result with `docs/openapi/openapi.yaml` and referenced OpenAPI path files.
 
 Use this skill when the user asks for any of the following:
 - "missing APIs"
@@ -101,7 +101,7 @@ Identify the scope:
 # Route registration entry points
 grep -R "func (.*RegisterRoutes" -n transports/bifrost-http/handlers transports/bifrost-http/integrations --include='*.go'
 
-grep -n "func (s \*BifrostHTTPServer) RegisterAPIRoutes\|func (s \*BifrostHTTPServer) RegisterInferenceRoutes\|RegisterUIRoutes" transports/bifrost-http/server/server.go
+grep -n "func (s \*FlareHTTPServer) RegisterAPIRoutes\|func (s \*FlareHTTPServer) RegisterInferenceRoutes\|RegisterUIRoutes" transports/bifrost-http/server/server.go
 ```
 
 If the user asked for `--fix`, still audit first and present a fix plan before editing.
@@ -153,11 +153,11 @@ SERVER=transports/bifrost-http/server/server.go
 
 # RegisterInferenceRoutes — inference route registrations.
 # Window is generous (+60) so newly added integration handlers don't fall outside it.
-INFER=$(grep -n "func (s \*BifrostHTTPServer) RegisterInferenceRoutes" "$SERVER" | head -1 | cut -d: -f1)
+INFER=$(grep -n "func (s \*FlareHTTPServer) RegisterInferenceRoutes" "$SERVER" | head -1 | cut -d: -f1)
 [ -n "$INFER" ] && sed -n "$((INFER)),$((INFER+60))p" "$SERVER"
 
 # RegisterAPIRoutes — management/api route registrations (conditional plugin routes live here)
-API=$(grep -n "func (s \*BifrostHTTPServer) RegisterAPIRoutes" "$SERVER" | head -1 | cut -d: -f1)
+API=$(grep -n "func (s \*FlareHTTPServer) RegisterAPIRoutes" "$SERVER" | head -1 | cut -d: -f1)
 [ -n "$API" ] && sed -n "$((API)),$((API+120))p" "$SERVER"
 
 # Middleware-assembly block — how apiMiddlewares / inferenceMiddlewares are composed,
@@ -471,7 +471,7 @@ grep -n "json.Unmarshal\|sonic.Unmarshal\|parse.*Multipart\|ContentType" transpo
 Inspect handler responses:
 
 ```bash
-grep -n "SendJSON\|SendError\|SendBifrostError\|SetStatusCode\|Status" transports/bifrost-http/handlers/<handler>.go
+grep -n "SendJSON\|SendError\|SendFlareError\|SetStatusCode\|Status" transports/bifrost-http/handlers/<handler>.go
 ```
 
 Compare with OpenAPI responses:
@@ -623,7 +623,7 @@ Report all validation results.
 
 ---
 
-## Common Bifrost route groups
+## Common Flare route groups
 
 Use this as a checklist; always verify against current code.
 

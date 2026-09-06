@@ -1,6 +1,6 @@
-# Bifrost on Azure AKS
+# Flare on Azure AKS
 
-Deploys Bifrost as a Kubernetes workload on Azure Kubernetes Service.
+Deploys Flare as a Kubernetes workload on Azure Kubernetes Service.
 
 ## Prerequisites
 

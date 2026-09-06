@@ -1,10 +1,10 @@
-# Bifrost Review Rules
+# Flare Review Rules
 
 ## Review Priorities
 
 Focus on correctness, regressions, concurrency bugs, streaming behavior, data races, API compatibility, and missing tests. Avoid comments that are only style preferences unless the style issue creates a real maintenance or behavior risk.
 
-When reviewing a PR, first identify which Bifrost area is touched:
+When reviewing a PR, first identify which Flare area is touched:
 
 - `core/`: provider lifecycle, inference routing, MCP, schemas, provider implementations, pooling.
 - `framework/`: persistence, streaming accumulators, vector stores, tracing, encryption.
@@ -32,7 +32,7 @@ When reviewing a PR, first identify which Bifrost area is touched:
 - Plugin pre-hooks run in registration order; post-hooks run in reverse order.
 - Plugin errors are logged as warnings, not returned to callers. Pre-hooks can short-circuit; post-hooks can recover from errors or invalidate responses. Fallbacks re-run the full plugin pipeline.
 - `AllowedRequests == nil` means all operations are allowed. Non-nil values only allow explicitly true fields.
-- Do not set Bifrost reserved context keys from handlers or plugins.
+- Do not set Flare reserved context keys from handlers or plugins.
 - `transports/config.schema.json` is the source of truth for config fields.
 - Config duration fields serialized as JSON must use milliseconds even when represented as `time.Duration` in Go. Mutable config maps such as `ExtraHeaders` must be defensively copied.
 - Whenever a migration is added or changed, verify it avoids deadlocks and long blocking locks on large tables. Index creation in migrations must be concurrent where the database supports it.

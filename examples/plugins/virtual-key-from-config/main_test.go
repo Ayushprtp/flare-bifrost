@@ -8,7 +8,7 @@ import (
 )
 
 func TestHTTPTransportPreAuthHook(t *testing.T) {
-	if err := Init(map[string]any{"virtual_key": "sk-bf-from-config"}); err != nil {
+	if err := Init(map[string]any{"virtual_key": "sk-fx-from-config"}); err != nil {
 		t.Fatalf("Init() error = %v", err)
 	}
 
@@ -20,17 +20,17 @@ func TestHTTPTransportPreAuthHook(t *testing.T) {
 		{
 			name:        "adds configured virtual key when header is absent",
 			headers:     map[string]string{"content-type": "application/json"},
-			wantHeaders: map[string]string{"content-type": "application/json", "x-bf-vk": "sk-bf-from-config"},
+			wantHeaders: map[string]string{"content-type": "application/json", "x-bf-vk": "sk-fx-from-config"},
 		},
 		{
 			name:        "preserves existing virtual key",
-			headers:     map[string]string{"x-bf-vk": "sk-bf-from-request"},
-			wantHeaders: map[string]string{"x-bf-vk": "sk-bf-from-request"},
+			headers:     map[string]string{"x-bf-vk": "sk-fx-from-request"},
+			wantHeaders: map[string]string{"x-bf-vk": "sk-fx-from-request"},
 		},
 		{
 			name:        "detects existing header case insensitively",
-			headers:     map[string]string{"X-Bf-Vk": "sk-bf-from-request"},
-			wantHeaders: map[string]string{"X-Bf-Vk": "sk-bf-from-request"},
+			headers:     map[string]string{"X-Bf-Vk": "sk-fx-from-request"},
+			wantHeaders: map[string]string{"X-Bf-Vk": "sk-fx-from-request"},
 		},
 		{
 			name:        "does not replace an existing empty header",
@@ -39,7 +39,7 @@ func TestHTTPTransportPreAuthHook(t *testing.T) {
 		},
 		{
 			name:        "initializes a nil header map",
-			wantHeaders: map[string]string{"x-bf-vk": "sk-bf-from-config"},
+			wantHeaders: map[string]string{"x-bf-vk": "sk-fx-from-config"},
 		},
 	}
 
@@ -67,7 +67,7 @@ func TestInitRejectsInvalidConfig(t *testing.T) {
 		config any
 	}{
 		{name: "nil config", config: nil},
-		{name: "non-object config", config: "sk-bf-test"},
+		{name: "non-object config", config: "sk-fx-test"},
 		{name: "missing virtual key", config: map[string]any{}},
 		{name: "non-string virtual key", config: map[string]any{"virtual_key": 123}},
 		{name: "empty virtual key", config: map[string]any{"virtual_key": ""}},

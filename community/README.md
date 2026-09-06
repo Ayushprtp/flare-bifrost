@@ -1,6 +1,6 @@
 # Community Contributions
 
-This directory contains community-maintained data that powers parts of the Bifrost platform. Contributions are reviewed by maintainers and, once merged into the `dev` branch, are synced to the live platform.
+This directory contains community-maintained data that powers parts of the Flare platform. Contributions are reviewed by maintainers and, once merged into the `dev` branch, are synced to the live platform.
 
 ## Available Catalogs
 
@@ -19,7 +19,7 @@ This directory contains community-maintained data that powers parts of the Bifro
                                                             Periodic sync
                                                                      │
                                                               ┌──────▼───────┐
-                                                              │   Bifrost    │
+                                                              │   Flare    │
                                                               │   Platform   │
                                                               └──────────────┘
 ```
@@ -27,7 +27,7 @@ This directory contains community-maintained data that powers parts of the Bifro
 1. **Contribute** — Edit the relevant JSON file and open a pull request.
 2. **Review** — Maintainers review your submission for accuracy, safety, and fit.
 3. **Merge** — Once approved, your PR is merged into `dev`.
-4. **Live** — Bifrost periodically reads the latest data from `dev` and serves it to all users.
+4. **Live** — Flare periodically reads the latest data from `dev` and serves it to all users.
 
 ## General Guidelines
 

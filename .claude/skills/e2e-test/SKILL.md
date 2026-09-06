@@ -1,13 +1,13 @@
 
 ---
 name: e2e-test
-description: Write, run, debug, audit, and auto-update Playwright E2E tests for the Bifrost UI. Use when asked to create new E2E tests, add test coverage, fix flaky tests, debug failing tests, audit test correctness, update tests after UI changes, or sync tests with modified components. Invoked with /e2e-test <FEATURE_NAME>, /e2e-test fix <SPEC_FILE>, /e2e-test sync, or /e2e-test audit.
+description: Write, run, debug, audit, and auto-update Playwright E2E tests for the Flare UI. Use when asked to create new E2E tests, add test coverage, fix flaky tests, debug failing tests, audit test correctness, update tests after UI changes, or sync tests with modified components. Invoked with /e2e-test <FEATURE_NAME>, /e2e-test fix <SPEC_FILE>, /e2e-test sync, or /e2e-test audit.
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task, AskUserQuestion, TodoWrite
 ---
 
 # Playwright E2E Testing
 
-Write, run, debug, and auto-update Playwright E2E tests following Bifrost's established patterns and conventions. Automatically detects UI changes and updates affected tests.
+Write, run, debug, and auto-update Playwright E2E tests following Flare's established patterns and conventions. Automatically detects UI changes and updates affected tests.
 
 ## Usage
 
@@ -440,7 +440,7 @@ All E2E tests live in `tests/e2e/`:
 ```
 tests/e2e/
 ├── playwright.config.ts           # Playwright configuration
-├── global-setup.ts                # Global setup (plugin build, MCP servers, Bifrost connectivity)
+├── global-setup.ts                # Global setup (plugin build, MCP servers, Flare connectivity)
 ├── core/                          # Shared utilities & fixtures
 │   ├── fixtures/
 │   │   ├── base.fixture.ts        # Main fixture - exports `test` and `expect` with all page objects
@@ -720,19 +720,19 @@ test.describe('Feature Name', () => {
 If creating a brand new feature, add it to `core/fixtures/base.fixture.ts`:
 
 1. Import the page class
-2. Add to `BifrostFixtures` type
+2. Add to `FlareFixtures` type
 3. Add fixture definition
 
 ```typescript
 // In base.fixture.ts
 import { FeaturePage } from '../../features/<feature>/pages/<feature>.page'
 
-type BifrostFixtures = {
+type FlareFixtures = {
   // ... existing
   featurePage: FeaturePage
 }
 
-export const test = base.extend<BifrostFixtures>({
+export const test = base.extend<FlareFixtures>({
   // ... existing
   featurePage: async ({ page }, use) => {
     await use(new FeaturePage(page))
@@ -782,7 +782,7 @@ make run-e2e-headed FLOW=<feature>
 
 **Environment variables:**
 - `BASE_URL` - Override app URL (default: http://localhost:3000)
-- `BIFROST_BASE_URL` - Override Bifrost API URL (default: http://localhost:8080)
+- `BIFROST_BASE_URL` - Override Flare API URL (default: http://localhost:8080)
 - `SKIP_WEB_SERVER=1` - Skip auto-starting Vite dev server
 - `CI=1` - Enable CI mode (retries, serial execution)
 

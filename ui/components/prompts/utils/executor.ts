@@ -22,7 +22,7 @@ function getBaseUrl() {
 function buildHeaders(config: Pick<ExecutionConfig, "apiKeyId" | "customHeaders">): Record<string, string> {
 	const headers: Record<string, string> = { "Content-Type": "application/json" };
 	if (config.apiKeyId && config.apiKeyId !== "__auto__") {
-		if (config.apiKeyId.startsWith("sk-bf-")) {
+		if (config.apiKeyId.startsWith("sk-fx-")) {
 			headers["Authorization"] = `Bearer ${config.apiKeyId}`;
 		} else {
 			headers["x-bf-api-key-id"] = config.apiKeyId;

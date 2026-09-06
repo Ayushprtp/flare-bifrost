@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	providerScopeTestVKValue     = "sk-bf-provider-scope"
+	providerScopeTestVKValue     = "sk-fx-provider-scope"
 	providerScopeTestOpenAIModel = "gpt-4o"
 	// The pricing fixture attributes this model to bedrock, so a bedrock request costs something.
 	// A model nobody prices costs nothing, and nothing is what a budget is never charged.

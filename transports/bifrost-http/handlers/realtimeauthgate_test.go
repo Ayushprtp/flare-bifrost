@@ -55,8 +55,8 @@ func TestRefuseUnauthenticatedRealtime_AnonymousAllowedWhenNotEnforced(t *testin
 func TestRefuseUnauthenticatedRealtime_VirtualKeyAllowed(t *testing.T) {
 	ctx, cancel := newRealtimeGateContext(t)
 	defer cancel()
-	ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
-	lib.RecordCredential(ctx, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-test"))
+	ctx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
+	lib.RecordCredential(ctx, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-test"))
 
 	if err := refuseUnauthenticatedRealtime(true, nil, ctx, ""); err != nil {
 		t.Fatalf("expected a virtual-key caller to be admitted, got %v", err)

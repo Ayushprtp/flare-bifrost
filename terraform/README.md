@@ -1,6 +1,6 @@
-# Bifrost Terraform Modules
+# Flare Terraform Modules
 
-Deploy Bifrost on AWS, GCP, Azure, or any Kubernetes cluster using a single Terraform module.
+Deploy Flare on AWS, GCP, Azure, or any Kubernetes cluster using a single Terraform module.
 
 ## Quick Start
 
@@ -43,7 +43,7 @@ module "bifrost" {
 
 ## Configuration
 
-Bifrost config can come from two sources simultaneously. Terraform variables override matching keys from the base file.
+Flare config can come from two sources simultaneously. Terraform variables override matching keys from the base file.
 
 1. **File-based**: Set `config_json_file` to a path or `config_json` to a raw JSON string.
 2. **Variable-based**: Set individual variables (`config_store`, `logs_store`, `providers_config`, `auth_config`, etc.) corresponding to top-level keys in [config.schema.json](../transports/config.schema.json).
@@ -113,7 +113,7 @@ terraform apply
 | `cloud_provider` | (required) | `"aws"`, `"gcp"`, `"azure"`, or `"kubernetes"` |
 | `service` | (required) | Service type (see table above) |
 | `region` | (required) | Cloud region |
-| `image_tag` | `"latest"` | Bifrost Docker image tag |
+| `image_tag` | `"latest"` | Flare Docker image tag |
 | `desired_count` | `1` | Number of replicas |
 | `cpu` | `512` | CPU units (ECS) or millicores (K8s) |
 | `memory` | `1024` | Memory in MB |
@@ -128,5 +128,5 @@ terraform apply
 
 | Output | Description |
 |--------|-------------|
-| `service_url` | URL to access Bifrost |
+| `service_url` | URL to access Flare |
 | `health_check_url` | Health endpoint URL |

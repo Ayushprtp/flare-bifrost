@@ -56,7 +56,7 @@ This creates `build/mcp-only.so`
 
 ## Configuration
 
-Add to your Bifrost config:
+Add to your Flare config:
 
 ```json
 {
@@ -70,7 +70,7 @@ Add to your Bifrost config:
       "config": {
         "blocked_tools": ["dangerous_tool", "risky_operation"],
         "blocked_clients": ["staging-only-mcp"],
-        "audit_header": "X-Bifrost-Audit",
+        "audit_header": "X-Flare-Audit",
         "enable_audit": true,
         "enable_logging": true,
         "transform_errors": true,

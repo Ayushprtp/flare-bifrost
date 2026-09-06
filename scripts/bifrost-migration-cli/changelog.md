@@ -1,1 +1,1 @@
-- feat: initial release of the Bifrost migration CLI
+- feat: initial release of the Flare migration CLI

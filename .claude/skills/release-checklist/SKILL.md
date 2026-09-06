@@ -1,6 +1,6 @@
 ---
 name: release-checklist
-description: Pre-release safety audit for the Bifrost repo. Scans database migrations changed in a release for high-scale deadlock / lock-contention risks and for work that blocks application boot time, then produces a pass/warn/fail report with a concrete remediation plan. Invoked with /release-checklist [git-ref-range]. Built to grow - new checks are appended to the Checks Registry.
+description: Pre-release safety audit for the Flare repo. Scans database migrations changed in a release for high-scale deadlock / lock-contention risks and for work that blocks application boot time, then produces a pass/warn/fail report with a concrete remediation plan. Invoked with /release-checklist [git-ref-range]. Built to grow - new checks are appended to the Checks Registry.
 allowed-tools: Read, Grep, Glob, Bash, Task, AskUserQuestion
 ---
 

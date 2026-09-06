@@ -401,7 +401,7 @@ func TestCacheRealtimeEphemeralKeyMappingStoresKeyID(t *testing.T) {
 		"value": "ek_test_456",
 		"expires_at": ` + "4102444800" + `
 	}`)
-	cacheRealtimeEphemeralKeyMapping(store, body, "key_123", "sk-bf-test")
+	cacheRealtimeEphemeralKeyMapping(store, body, "key_123", "sk-fx-test")
 
 	raw, err := store.Get(buildRealtimeEphemeralKeyMappingKey("ek_test_456"))
 	if err != nil {
@@ -418,8 +418,8 @@ func TestCacheRealtimeEphemeralKeyMappingStoresKeyID(t *testing.T) {
 	if mapping.KeyID != "key_123" {
 		t.Fatalf("mapping.KeyID = %q, want %q", mapping.KeyID, "key_123")
 	}
-	if mapping.VirtualKey != "sk-bf-test" {
-		t.Fatalf("mapping.VirtualKey = %q, want %q", mapping.VirtualKey, "sk-bf-test")
+	if mapping.VirtualKey != "sk-fx-test" {
+		t.Fatalf("mapping.VirtualKey = %q, want %q", mapping.VirtualKey, "sk-fx-test")
 	}
 }
 
@@ -602,7 +602,7 @@ func TestRealtimeClientSecretsEvaluateMintingGovernance_PassesContext(t *testing
 	bifrostCtx := schemas.NewBifrostContext(context.Background(), schemas.NoDeadline)
 	defer bifrostCtx.Done()
 	bifrostCtx.SetValue(schemas.BifrostContextKeyUserID, "user_123")
-	bifrostCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-123")
+	bifrostCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-123")
 
 	if err := handler.evaluateMintingGovernance(bifrostCtx, schemas.OpenAI, "gpt-realtime"); err != nil {
 		t.Fatalf("unexpected governance error: %v", err)
@@ -613,8 +613,8 @@ func TestRealtimeClientSecretsEvaluateMintingGovernance_PassesContext(t *testing
 	if plugin.seenUserID != "user_123" {
 		t.Fatalf("governance user id = %q, want %q", plugin.seenUserID, "user_123")
 	}
-	if plugin.seenVirtualKey != "sk-bf-123" {
-		t.Fatalf("virtual key = %q, want %q", plugin.seenVirtualKey, "sk-bf-123")
+	if plugin.seenVirtualKey != "sk-fx-123" {
+		t.Fatalf("virtual key = %q, want %q", plugin.seenVirtualKey, "sk-fx-123")
 	}
 	if plugin.seenProvider != schemas.OpenAI {
 		t.Fatalf("provider = %q, want %q", plugin.seenProvider, schemas.OpenAI)

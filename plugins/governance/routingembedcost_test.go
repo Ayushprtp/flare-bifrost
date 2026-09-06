@@ -91,7 +91,7 @@ func TestPostHookWorkerAddsRoutingCostToProviderUsageOnError(t *testing.T) {
 		},
 	}
 
-	settled := settleLimits(fixture.store, "sk-bf-acct", schemas.OpenAI, "gpt-4o", &UsageUpdate{})
+	settled := settleLimits(fixture.store, "sk-fx-acct", schemas.OpenAI, "gpt-4o", &UsageUpdate{})
 	plugin.postHookWorker(nil, bifrostErr, schemas.OpenAI, "gpt-4o", schemas.ChatCompletionRequest, "routing-error", false, 0, nil, settled.Budgets, settled.RateLimits, routingMetadata)
 
 	// gpt-4o testdata: 2.5e-6 input, 1e-5 output. Routing embedding:

@@ -117,7 +117,7 @@ func TestParseCallsWebRTCRequest_RawSDPKeepsGARoute(t *testing.T) {
 func TestNewRealtimeRelayContextCarriesRequestGrant(t *testing.T) {
 	requestCtx, requestCancel := schemas.NewBifrostContextWithCancel(context.Background())
 	defer requestCancel()
-	lib.RecordCredential(requestCtx, grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-relay"))
+	lib.RecordCredential(requestCtx, grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-relay"))
 
 	relayCtx, relayCancel := newRealtimeRelayContext(requestCtx)
 	defer relayCancel()
@@ -125,7 +125,7 @@ func TestNewRealtimeRelayContextCarriesRequestGrant(t *testing.T) {
 	if relayCtx.Grant() != requestCtx.Grant() {
 		t.Fatal("relay context should carry the request's grant")
 	}
-	if got := relayCtx.Grant().Identity().Credential(); got.Value != "sk-bf-relay" {
+	if got := relayCtx.Grant().Identity().Credential(); got.Value != "sk-fx-relay" {
 		t.Fatalf("credential = %+v, want the request's virtual key", got)
 	}
 
@@ -211,7 +211,7 @@ func TestLookupRealtimeEphemeralKeyMappingKeepsEntryUntilTTLExpiry(t *testing.T)
 	}
 	defer store.Close()
 
-	payload, err := json.Marshal(realtimeEphemeralKeyMapping{KeyID: "key_123", VirtualKey: "sk-bf-test"})
+	payload, err := json.Marshal(realtimeEphemeralKeyMapping{KeyID: "key_123", VirtualKey: "sk-fx-test"})
 	if err != nil {
 		t.Fatalf("json.Marshal() error = %v", err)
 	}
@@ -226,8 +226,8 @@ func TestLookupRealtimeEphemeralKeyMappingKeepsEntryUntilTTLExpiry(t *testing.T)
 	if mapping.KeyID != "key_123" {
 		t.Fatalf("mapping.KeyID = %q, want %q", mapping.KeyID, "key_123")
 	}
-	if mapping.VirtualKey != "sk-bf-test" {
-		t.Fatalf("mapping.VirtualKey = %q, want %q", mapping.VirtualKey, "sk-bf-test")
+	if mapping.VirtualKey != "sk-fx-test" {
+		t.Fatalf("mapping.VirtualKey = %q, want %q", mapping.VirtualKey, "sk-fx-test")
 	}
 
 	raw, err := store.Get(buildRealtimeEphemeralKeyMappingKey("ek_test_123"))
@@ -364,11 +364,11 @@ func TestApplyRealtimeEphemeralKeyMapping_RestoresVirtualKeyAndKeyID(t *testing.
 	bifrostCtx := schemas.NewBifrostContext(context.Background(), schemas.NoDeadline)
 	applyRealtimeEphemeralKeyMapping(bifrostCtx, realtimeEphemeralKeyMapping{
 		KeyID:      "key_123",
-		VirtualKey: "sk-bf-test",
+		VirtualKey: "sk-fx-test",
 	})
 
-	if got := bifrostCtx.Value(schemas.BifrostContextKeyVirtualKey); got != "sk-bf-test" {
-		t.Fatalf("virtual key context = %#v, want %q", got, "sk-bf-test")
+	if got := bifrostCtx.Value(schemas.BifrostContextKeyVirtualKey); got != "sk-fx-test" {
+		t.Fatalf("virtual key context = %#v, want %q", got, "sk-fx-test")
 	}
 	if got := bifrostCtx.Value(schemas.BifrostContextKeyAPIKeyID); got != "key_123" {
 		t.Fatalf("api key id context = %#v, want %q", got, "key_123")

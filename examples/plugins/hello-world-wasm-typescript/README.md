@@ -1,6 +1,6 @@
-# Bifrost WASM Plugin (TypeScript/AssemblyScript)
+# Flare WASM Plugin (TypeScript/AssemblyScript)
 
-A comprehensive example of a Bifrost plugin written in TypeScript and compiled to WebAssembly using AssemblyScript. This plugin demonstrates proper structure definitions, JSON parsing, context handling, and request/response modification patterns.
+A comprehensive example of a Flare plugin written in TypeScript and compiled to WebAssembly using AssemblyScript. This plugin demonstrates proper structure definitions, JSON parsing, context handling, and request/response modification patterns.
 
 ## Prerequisites
 
@@ -76,7 +76,7 @@ This plugin uses `json-as` with `@json` decorators for automatic JSON serializat
 
 ```typescript
 @json
-class BifrostContext {
+class FlareContext {
   request_id: string = ''        // Unique request identifier
   plugin_processed: string = ''  // Custom plugin values
   plugin_name: string = ''
@@ -119,7 +119,7 @@ class ChatParameters {
 }
 
 @json
-class BifrostChatRequest {
+class FlareChatRequest {
   provider: string = ''    // "openai", "anthropic", etc.
   model: string = ''       // "gpt-4", "claude-3", etc.
   input: ChatMessage[] = []
@@ -145,7 +145,7 @@ class ResponseChoice {
 }
 
 @json
-class BifrostChatResponse {
+class FlareChatResponse {
   id: string = ''
   model: string = ''
   choices: ResponseChoice[] = []
@@ -164,7 +164,7 @@ class ErrorField {
 }
 
 @json
-class BifrostError {
+class FlareError {
   error: ErrorField = new ErrorField()
   status_code: i32 = 0
 }
@@ -175,8 +175,8 @@ class BifrostError {
 ```typescript
 @json
 class LLMPluginShortCircuit {
-  response: BifrostResponse | null = null  // Success short-circuit
-  error: BifrostError | null = null        // Error short-circuit
+  response: FlareResponse | null = null  // Success short-circuit
+  error: FlareError | null = null        // Error short-circuit
 }
 ```
 
@@ -307,8 +307,8 @@ export function pre_hook(inputPtr: u32, inputLen: u32): u64 {
     output.short_circuit = new LLMPluginShortCircuit()
     
     // Build mock response
-    const mockResponse = new BifrostResponse()
-    mockResponse.chat_response = new BifrostChatResponse()
+    const mockResponse = new FlareResponse()
+    mockResponse.chat_response = new FlareChatResponse()
     mockResponse.chat_response!.id = 'mock-' + input.context.request_id
     mockResponse.chat_response!.model = 'mock-model'
     
@@ -348,7 +348,7 @@ export function pre_hook(inputPtr: u32, inputLen: u32): u64 {
     output.has_short_circuit = true
     output.short_circuit = new LLMPluginShortCircuit()
     
-    const error = new BifrostError()
+    const error = new FlareError()
     error.error.message = 'Rate limit exceeded'
     error.error.type = 'rate_limit'
     error.error.code = '429'
@@ -395,9 +395,9 @@ export function post_hook(inputPtr: u32, inputLen: u32): u64 {
 }
 ```
 
-## Usage with Bifrost
+## Usage with Flare
 
-Configure the plugin in your Bifrost config:
+Configure the plugin in your Flare config:
 
 ```json
 {

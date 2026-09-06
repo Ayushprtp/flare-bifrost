@@ -1,6 +1,6 @@
-# Bifrost on Kubernetes
+# Flare on Kubernetes
 
-Deploys Bifrost on any existing Kubernetes cluster using a Deployment, PVC, and optional Ingress + HPA.
+Deploys Flare on any existing Kubernetes cluster using a Deployment, PVC, and optional Ingress + HPA.
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@ See `terraform.tfvars.example` for examples of both.
 
 ## Ingress
 
-To expose Bifrost externally, set `create_load_balancer = true` and configure:
+To expose Flare externally, set `create_load_balancer = true` and configure:
 
 - `ingress_class_name` -- Your ingress controller class (e.g. `nginx`, `traefik`, `haproxy`)
 - `domain_name` -- The hostname for the Ingress rule

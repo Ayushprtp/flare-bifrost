@@ -1,12 +1,12 @@
 ---
 name: changelog-writer
-description: Write changelogs for Bifrost releases. Reads git history, bumps module versions following the core→framework→plugins→transport hierarchy, writes transports/changelog.md (enterprise-style) and per-module changelog.md files, and updates version files. Invoked with /changelog-writer or /changelog-writer <transport-version>.
+description: Write changelogs for Flare releases. Reads git history, bumps module versions following the core→framework→plugins→transport hierarchy, writes transports/changelog.md (enterprise-style) and per-module changelog.md files, and updates version files. Invoked with /changelog-writer or /changelog-writer <transport-version>.
 allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Task, AskUserQuestion
 ---
 
 # Changelog Writer
 
-Generate changelogs for a new Bifrost release. Reads git history to identify changes per module, asks the user for version bump type, bumps all module versions respecting the dependency hierarchy, writes `transports/changelog.md` and per-module `changelog.md` files, and updates version files.
+Generate changelogs for a new Flare release. Reads git history to identify changes per module, asks the user for version bump type, bumps all module versions respecting the dependency hierarchy, writes `transports/changelog.md` and per-module `changelog.md` files, and updates version files.
 
 **IMPORTANT: This skill NEVER creates or modifies files under `docs/`.** No MDX files, no docs.json updates. Only `changelog.md` and `version` files within module directories.
 
@@ -241,9 +241,9 @@ gh api "repos/$REPO/pulls/<PR_NUMBER>" --jq '"\(.number) \(.user.login) \(.autho
 Use a markdown link to the contributor's GitHub profile: `[@username](https://github.com/username)`
 
 - In **transports/changelog.md** (enterprise-style): append `(thanks [@username](https://github.com/username)!)` to the description
-  - Example: `- **Logprobs JSON Tag** - Fixed logprobs JSON tag in BifrostResponseChoice (thanks [@contributor](https://github.com/contributor)!)`
+  - Example: `- **Logprobs JSON Tag** - Fixed logprobs JSON tag in FlareResponseChoice (thanks [@contributor](https://github.com/contributor)!)`
 - In **per-module changelog.md** (flat-list): append `(thanks [@username](https://github.com/username)!)` to the entry
-  - Example: `- fix: fixed logprobs JSON tag in BifrostResponseChoice (thanks [@contributor](https://github.com/contributor)!)`
+  - Example: `- fix: fixed logprobs JSON tag in FlareResponseChoice (thanks [@contributor](https://github.com/contributor)!)`
 
 If multiple PRs from the same outside contributor are grouped into one entry, credit them once.
 

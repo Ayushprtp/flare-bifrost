@@ -25,7 +25,7 @@ func TestAuth_Submit_InvalidVK_Returns400(t *testing.T) {
 		t.Skip("BIFROST_VK not set — governance may not be active")
 	}
 	ec := chatCompletionCase()
-	code, _, body := submitCase(t, ec, vkHeaders("sk-bf-nonexistent-key-for-auth-test"))
+	code, _, body := submitCase(t, ec, vkHeaders("sk-fx-nonexistent-key-for-auth-test"))
 	if code != http.StatusBadRequest {
 		t.Errorf("expected 400 for unknown VK on submit, got %d: %s", code, body)
 	}
@@ -117,18 +117,18 @@ func TestAuth_PublicJob_VKPoll_Succeeds(t *testing.T) {
 	assertPollSuccess(t, code, body)
 }
 
-// vkPrefixed returns true when vk begins with the governance virtual-key prefix "sk-bf-".
+// vkPrefixed returns true when vk begins with the governance virtual-key prefix "sk-fx-".
 // Only keys with this prefix are recognised by the Authorization, x-api-key, and
 // x-goog-api-key header paths in ConvertToBifrostContext.
 func vkPrefixed(vk string) bool {
-	return strings.HasPrefix(strings.ToLower(vk), "sk-bf-")
+	return strings.HasPrefix(strings.ToLower(vk), "sk-fx-")
 }
 
 // TestAuth_BearerVK_SameKey_Succeeds submits with "Authorization: Bearer <vk>" and
 // polls with the same header.  Verifies the Bearer token path in ConvertToBifrostContext.
 func TestAuth_BearerVK_SameKey_Succeeds(t *testing.T) {
 	if cfg.VK == "" || !vkPrefixed(cfg.VK) {
-		t.Skip("BIFROST_VK not set or does not start with sk-bf- prefix")
+		t.Skip("BIFROST_VK not set or does not start with sk-fx- prefix")
 	}
 	ec := chatCompletionCase()
 	headers := map[string]string{"Authorization": "Bearer " + cfg.VK}
@@ -145,7 +145,7 @@ func TestAuth_BearerVK_SameKey_Succeeds(t *testing.T) {
 // the same header.  Verifies the x-api-key path in ConvertToBifrostContext.
 func TestAuth_ApiKeyVK_SameKey_Succeeds(t *testing.T) {
 	if cfg.VK == "" || !vkPrefixed(cfg.VK) {
-		t.Skip("BIFROST_VK not set or does not start with sk-bf- prefix")
+		t.Skip("BIFROST_VK not set or does not start with sk-fx- prefix")
 	}
 	ec := chatCompletionCase()
 	headers := map[string]string{"x-api-key": cfg.VK}
@@ -162,7 +162,7 @@ func TestAuth_ApiKeyVK_SameKey_Succeeds(t *testing.T) {
 // with the same header.  Verifies the x-goog-api-key path in ConvertToBifrostContext.
 func TestAuth_GoogApiKeyVK_SameKey_Succeeds(t *testing.T) {
 	if cfg.VK == "" || !vkPrefixed(cfg.VK) {
-		t.Skip("BIFROST_VK not set or does not start with sk-bf- prefix")
+		t.Skip("BIFROST_VK not set or does not start with sk-fx- prefix")
 	}
 	ec := chatCompletionCase()
 	headers := map[string]string{"x-goog-api-key": cfg.VK}

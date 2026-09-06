@@ -47,7 +47,7 @@ func newAccountingFixture(t *testing.T) *accountingFixture {
 
 	budget := buildBudgetWithUsage("budget1", 1_000_000.0, 0.0, "1d")
 	rl := buildRateLimit("rl1", 1_000_000_000, 1_000_000)
-	vk := buildVirtualKeyWithBudget("vk1", "sk-bf-acct", "Acct VK", budget)
+	vk := buildVirtualKeyWithBudget("vk1", "sk-fx-acct", "Acct VK", budget)
 	vk.RateLimit = rl
 	rlID := rl.ID
 	vk.RateLimitID = &rlID
@@ -68,7 +68,7 @@ func newAccountingFixture(t *testing.T) *accountingFixture {
 
 func (f *accountingFixture) apply(updates ...*UsageUpdate) {
 	for _, u := range updates {
-		f.tracker.UpdateUsage(context.Background(), settleLimits(f.store, "sk-bf-acct", schemas.OpenAI, "gpt-4", u))
+		f.tracker.UpdateUsage(context.Background(), settleLimits(f.store, "sk-fx-acct", schemas.OpenAI, "gpt-4", u))
 	}
 	// Let async processing settle.
 	time.Sleep(250 * time.Millisecond)
@@ -359,7 +359,7 @@ func TestAccounting_ChargesExactlyWhatWasChecked(t *testing.T) {
 
 	team := buildTeam("team1", "Team 1", nil)
 	team.RateLimitID = &teamRL.ID
-	vk := buildVirtualKeyWithRateLimit("vk1", "sk-bf-charge", "Charging VK", keyRL)
+	vk := buildVirtualKeyWithRateLimit("vk1", "sk-fx-charge", "Charging VK", keyRL)
 	vk.TeamID = &team.ID
 	vk.Team = team
 	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{
@@ -382,7 +382,7 @@ func TestAccounting_ChargesExactlyWhatWasChecked(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { require.NoError(t, plugin.Cleanup()) })
 
-	ctx := resolverCtx(store, "sk-bf-charge")
+	ctx := resolverCtx(store, "sk-fx-charge")
 
 	// The whole funnel: the check settles what this request answers to, the response counts against it.
 	_, shortCircuit, err := plugin.PreLLMHook(ctx, newChatRequest())
@@ -442,7 +442,7 @@ func governedPassthroughFixture(t *testing.T) (*GovernancePlugin, GovernanceStor
 	logger := NewMockLogger()
 
 	rl := buildRateLimit("rl-vk", 1_000_000, 1_000_000)
-	vk := buildVirtualKeyWithRateLimit("vk-pt", "sk-bf-pt", "Passthrough VK", rl)
+	vk := buildVirtualKeyWithRateLimit("vk-pt", "sk-fx-pt", "Passthrough VK", rl)
 	vk.ProviderConfigs = append(vk.ProviderConfigs, buildProviderConfig("vertex", []string{"*"}))
 
 	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{
@@ -513,7 +513,7 @@ func TestAccounting_ModellessPassthroughIsCharged(t *testing.T) {
 			// A fixture per case: settling the accounting spends the plugin.
 			plugin, store := governedPassthroughFixture(t)
 
-			ctx := presentCtx("sk-bf-pt")
+			ctx := presentCtx("sk-fx-pt")
 			_, shortCircuit, err := plugin.PreLLMHook(ctx, &schemas.BifrostRequest{
 				RequestType: tc.requestType,
 				PassthroughRequest: &schemas.BifrostPassthroughRequest{
@@ -608,7 +608,7 @@ func TestAccounting_RequestsThatSpendNothingAreNotCharged(t *testing.T) {
 			// as a real call's are. Without that the assertion below is worth nothing: a post hook
 			// reached with an empty grant charges nothing whatever accounting decides, so the test
 			// would hold just as well if these requests were being billed.
-			ctx := presentCtx("sk-bf-pt")
+			ctx := presentCtx("sk-fx-pt")
 			_, shortCircuit, err := plugin.PreLLMHook(ctx, tc.request)
 			require.NoError(t, err)
 			require.Nil(t, shortCircuit, "the call is permitted and costs nothing")

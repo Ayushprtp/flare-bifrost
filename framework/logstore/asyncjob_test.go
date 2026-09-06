@@ -53,7 +53,7 @@ func newTestAsyncExecutor(t *testing.T) *AsyncJobExecutor {
 
 	govStore := &testGovernanceStore{
 		virtualKeys: map[string]*configstoreTables.TableVirtualKey{
-			"sk-bf-test": {ID: "vk-123", Value: *schemas.NewSecretVar("sk-bf-test")},
+			"sk-fx-test": {ID: "vk-123", Value: *schemas.NewSecretVar("sk-fx-test")},
 		},
 	}
 
@@ -95,7 +95,7 @@ func TestSubmitJob_PropagatesContextValues(t *testing.T) {
 	executor := newTestAsyncExecutor(t)
 
 	capturedCtx := schemas.NewBifrostContext(context.Background(), time.Now().Add(1*time.Minute))
-	capturedCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	capturedCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	capturedCtx.SetValue(schemas.BifrostContextKey("x-bf-eh-custom"), "custom-value")
 	capturedCtx.SetValue(schemas.BifrostContextKey("x-bf-prom-env"), "production")
 	var done atomic.Bool
@@ -112,7 +112,7 @@ func TestSubmitJob_PropagatesContextValues(t *testing.T) {
 
 	waitForJobCompletion(t, &done)
 
-	assert.Equal(t, "sk-bf-test", capturedCtx.Value(schemas.BifrostContextKeyVirtualKey))
+	assert.Equal(t, "sk-fx-test", capturedCtx.Value(schemas.BifrostContextKeyVirtualKey))
 	assert.Equal(t, "production", capturedCtx.Value(schemas.BifrostContextKey("x-bf-prom-env")))
 	assert.Equal(t, "custom-value", capturedCtx.Value(schemas.BifrostContextKey("x-bf-eh-custom")))
 	assert.Equal(t, true, capturedCtx.Value(schemas.BifrostIsAsyncRequest))
@@ -126,9 +126,9 @@ func TestSubmitJob_PropagatesGrant(t *testing.T) {
 	executor := newTestAsyncExecutor(t)
 
 	submitCtx := schemas.NewBifrostContext(context.Background(), time.Now().Add(1*time.Minute))
-	submitCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	submitCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 	g := grant.New()
-	g.SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialVirtualKey, "sk-bf-test"), nil, nil, nil, nil, nil, nil))
+	g.SetIdentity(grant.NewIdentity(grant.NewCredential(grant.CredentialVirtualKey, "sk-fx-test"), nil, nil, nil, nil, nil, nil))
 	require.True(t, submitCtx.SetGrant(g))
 
 	var gotGrant schemas.Grant
@@ -148,7 +148,7 @@ func TestSubmitJob_PropagatesGrant(t *testing.T) {
 
 	require.NotNil(t, gotGrant, "background context lost the grant settled on the submit call's context")
 	assert.Same(t, g, gotGrant, "background context must carry the submit call's grant, not a copy")
-	assert.Equal(t, "sk-bf-test", gotGrant.Identity().Credential().Value)
+	assert.Equal(t, "sk-fx-test", gotGrant.Identity().Credential().Value)
 }
 
 func TestSubmitJob_StoresRequestID(t *testing.T) {
@@ -241,7 +241,7 @@ func TestSubmitJob_OperationFailure_PreservesContext(t *testing.T) {
 	executor := newTestAsyncExecutor(t)
 
 	inputCtx := schemas.NewBifrostContext(context.Background(), schemas.NoDeadline)
-	inputCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-bf-test")
+	inputCtx.SetValue(schemas.BifrostContextKeyVirtualKey, "sk-fx-test")
 
 	var capturedCtx *schemas.BifrostContext
 	var done atomic.Bool
@@ -263,7 +263,7 @@ func TestSubmitJob_OperationFailure_PreservesContext(t *testing.T) {
 	waitForJobCompletion(t, &done)
 
 	// Context values should still be available even when operation fails
-	assert.Equal(t, "sk-bf-test", capturedCtx.Value(schemas.BifrostContextKeyVirtualKey))
+	assert.Equal(t, "sk-fx-test", capturedCtx.Value(schemas.BifrostContextKeyVirtualKey))
 	assert.Equal(t, true, capturedCtx.Value(schemas.BifrostIsAsyncRequest))
 
 	// Verify job was marked as failed — poll until DB update completes

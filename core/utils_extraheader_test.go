@@ -19,8 +19,8 @@ func TestExtraHeaderSpanAttribute(t *testing.T) {
 		wantExport bool
 		wantValue  any
 	}{
-		{"virtual key dropped entirely", "x-bf-vk", []string{"sk-bf-secret"}, false, nil},
-		{"virtual key dropped case-insensitively", "X-BF-VK", []string{"sk-bf-secret"}, false, nil},
+		{"virtual key dropped entirely", "x-bf-vk", []string{"sk-fx-secret"}, false, nil},
+		{"virtual key dropped case-insensitively", "X-BF-VK", []string{"sk-fx-secret"}, false, nil},
 		{"other x-bf-* still exported", "x-bf-custom", []string{"v"}, true, "v"},
 		{"authorization redacted", "authorization", []string{"Bearer sk-ant-oat01"}, true, schemas.RedactedAttrValue},
 		{"api key redacted", "x-api-key", []string{"sk-ant-key"}, true, schemas.RedactedAttrValue},

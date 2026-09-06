@@ -1,9 +1,9 @@
 # mcp-test-client
 
-A tiny interactive MCP client for exercising a running Bifrost `/mcp` endpoint
+A tiny interactive MCP client for exercising a running Flare `/mcp` endpoint
 under any inbound-auth configuration. It speaks streamable HTTP via
 [`mark3labs/mcp-go`](https://github.com/mark3labs/mcp-go) and supports both
-credential styles the Bifrost MCP server accepts:
+credential styles the Flare MCP server accepts:
 
 - **header credentials** — a virtual key (`x-bf-vk`, `Authorization: Bearer`, or
   `x-api-key`), a JWT (`Authorization: Bearer`), or a session id

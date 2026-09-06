@@ -888,7 +888,7 @@ func isRealtimeTransportEndpoint(path string) bool {
 
 func hasVirtualKeyCredential(ctx *fasthttp.RequestCtx) bool {
 	// x-bf-vk mirrors the canonical VK parser (lib.ConvertToBifrostContext): any
-	// non-empty value is accepted, no sk-bf- prefix required — the header itself
+	// non-empty value is accepted, no sk-fx- prefix required — the header itself
 	// is the signal, not the value shape.
 	if vkHeader := strings.TrimSpace(string(ctx.Request.Header.Peek(string(schemas.BifrostContextKeyVirtualKey)))); vkHeader != "" {
 		return true

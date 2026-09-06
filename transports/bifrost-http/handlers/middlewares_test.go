@@ -882,7 +882,7 @@ func TestAuthMiddleware_InferenceMiddleware_DelegatesAuthToGovernance(t *testing
 		headerKey string
 		headerVal string
 	}{
-		{name: "chat completion with virtual key", uri: "/v1/chat/completions", headerKey: "x-bf-vk", headerVal: "sk-bf-abc123"},
+		{name: "chat completion with virtual key", uri: "/v1/chat/completions", headerKey: "x-bf-vk", headerVal: "sk-fx-abc123"},
 		{name: "chat completion without credentials", uri: "/v1/chat/completions"},
 		{name: "realtime minting (client_secrets)", uri: "/v1/realtime/client_secrets"},
 		{name: "realtime minting (sessions)", uri: "/openai/v1/realtime/sessions"},
@@ -922,7 +922,7 @@ func TestAuthMiddleware_APIMiddleware_VirtualKeyDoesNotBypass(t *testing.T) {
 
 	ctx := &fasthttp.RequestCtx{}
 	ctx.Request.SetRequestURI("/api/config")
-	ctx.Request.Header.Set("x-bf-vk", "sk-bf-abc123")
+	ctx.Request.Header.Set("x-bf-vk", "sk-fx-abc123")
 
 	nextCalled := false
 	next := func(ctx *fasthttp.RequestCtx) { nextCalled = true }
@@ -2530,7 +2530,7 @@ func TestTransportPreAuthInterceptorMiddleware_HeaderVisibleToNext(t *testing.T)
 	config := preAuthTestConfig(&fakePreAuthPlugin{
 		name: "vk-injector",
 		hook: func(_ *schemas.BifrostContext, req *schemas.HTTPRequest) (*schemas.HTTPResponse, error) {
-			req.Headers["x-bf-vk"] = "sk-bf-injected"
+			req.Headers["x-bf-vk"] = "sk-fx-injected"
 			req.Query["injected"] = "yes"
 			return nil, nil
 		},
@@ -2545,7 +2545,7 @@ func TestTransportPreAuthInterceptorMiddleware_HeaderVisibleToNext(t *testing.T)
 	ctx := preAuthTestCtx()
 	handler(ctx)
 
-	if seenVK != "sk-bf-injected" {
+	if seenVK != "sk-fx-injected" {
 		t.Errorf("expected next middleware to see the injected virtual key, got %q", seenVK)
 	}
 	if seenQuery != "yes" {

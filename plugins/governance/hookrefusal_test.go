@@ -24,7 +24,7 @@ import (
 
 // refusalTestUnknownVKValue is a key value no store in this file serves, standing in for one that was
 // issued and has since been deleted or revoked.
-const refusalTestUnknownVKValue = "sk-bf-refusal-revoked"
+const refusalTestUnknownVKValue = "sk-fx-refusal-revoked"
 
 // refusalTestPlugin builds a plugin serving exactly one virtual key, with mutate free to make that key
 // unusable. Mandatory authentication is off throughout this file, so nothing here is refused for
