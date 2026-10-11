@@ -3,7 +3,7 @@ module github.com/maximhq/bifrost/plugins/modelcatalogresolver
 go 1.27.0
 
 require (
-	github.com/maximhq/bifrost/core v1.8.3
+	github.com/maximhq/bifrost/core v1.11.3
 	github.com/maximhq/bifrost/framework v1.6.0
 )
 
@@ -100,13 +100,13 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.19.2 // indirect
+	github.com/klauspost/compress v1.20.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mailru/easyjson v0.9.1 // indirect
 	github.com/mark3labs/mcp-go v0.43.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mattn/go-sqlite3 v1.14.32 // indirect
 	github.com/molecule-man/go-brrr v1.0.1 // indirect
 	github.com/oapi-codegen/runtime v1.1.1 // indirect
@@ -134,7 +134,7 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.71.0 // indirect
+	github.com/valyala/fasthttp v1.74.0 // indirect
 	github.com/weaviate/weaviate v1.38.0 // indirect
 	github.com/weaviate/weaviate-go-client/v5 v5.7.1 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
